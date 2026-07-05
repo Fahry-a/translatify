@@ -61,12 +61,20 @@ The extension is now active.
 
 ---
 
+## Documentation
+
+Guides are available in the [Translatify Wiki](https://github.com/Slyfti/translatify/wiki), including a [Custom AI Provider (BYOK) guide](https://github.com/Slyfti/translatify/wiki/Custom-AI-BYOK-Provider) with a free setup using Google AI Studio.
+
+---
+
 ## AI Translation Notice (Experimental)
 
 Configure the AI provider, tap the translation and sit for few seconds.
 AI translation requires full lyrics as context to improve its tranlsation quality, which also is a **time consuming** task.  
 To reduce AI translation time, you can **turn off thinking mode**.
 When the AI translation not finish, it partially use Google Translation instead.
+
+See the [Custom AI Provider (BYOK) guide](https://github.com/Slyfti/translatify/wiki/Custom-AI-BYOK-Provider) for step-by-step setup.
 
 ---
 ### Getting Help
