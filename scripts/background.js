@@ -22,8 +22,14 @@ const ENDPOINTS = [
 const DEFAULT_DEEPL_ENDPOINT = 'https://deeplx.oryn.my.id/deepl';
 
 // DeepL expects uppercase ISO-639-1 codes (EN, ID, ZH, ...). Regional variants
-// use a hyphen + uppercase region (EN-US, PT-BR). Map the selector's codes.
+// use a hyphen + uppercase region (EN-US, PT-BR). DeepL also accepts a few
+// 3-letter codes (BHO, CEB, CKB, GOM, KMR, YUE, ...) and language aliases that do
+// NOT follow the simple "uppercase the base code" rule used by the fallback.
+//
+// Only map entries that differ from the fallback to avoid noise. See the full
+// list of supported DeepL languages in deeplx-lang.md.
 const DEEPL_LANG_MAP = {
+    // Regional/variant codes where DeepL diverges from the simple fallback.
     'zh-cn': 'ZH',
     'zh-tw': 'ZH',
     'pt': 'PT',
@@ -32,6 +38,24 @@ const DEEPL_LANG_MAP = {
     'en': 'EN',
     'en-us': 'EN-US',
     'en-gb': 'EN-GB',
+    // Aliases — these selector codes map to a DIFFERENT DeepL code than the
+    // naive uppercased base code would produce.
+    'fil': 'TL',   // Filipino  -> DeepL's Tagalog (TL), not "FIL"
+    'no': 'NB',    // Norwegian -> DeepL's Norwegian Bokmål (NB), not "NO"
+    'ku': 'KMR',   // Kurdish   -> DeepL's Kurmanji (KMR), not "KU"
+    // 3-letter codes supported by DeepL. The fallback would actually produce
+    // these correctly, but listing them here guards against case/quoting issues
+    // and documents which 3-letter selector values are DeepL-compatible.
+    'bho': 'BHO',
+    'ceb': 'CEB',
+    'ckb': 'CKB',
+    'gom': 'GOM',
+    'ig': 'IG',
+    'mai': 'MAI',
+    'pag': 'PAG',
+    'pam': 'PAM',
+    'scn': 'SCN',
+    'yi': 'YI',
 };
 
 function deeplLangCode(lang) {
