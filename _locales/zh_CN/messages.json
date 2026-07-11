@@ -67,6 +67,22 @@
         "message": "自定义 AI（兼容 OpenAI）",
         "description": "Custom AI provider option"
     },
+    "providerDeepL": {
+        "message": "DeepL（兼容 DeepLX）",
+        "description": "DeepL provider option"
+    },
+    "deeplEndpoint": {
+        "message": "DeepLX 端点地址",
+        "description": "Label for DeepLX endpoint input"
+    },
+    "deeplEndpointHint": {
+        "message": "留空则使用默认公共端点。源语言留空时自动检测。",
+        "description": "Hint explaining the DeepLX endpoint field"
+    },
+    "deeplTestConnection": {
+        "message": "测试连接",
+        "description": "Button to test DeepL endpoint connection"
+    },
     "aiEndpoint": {
         "message": "API 端点地址",
         "description": "Label for AI API endpoint input"

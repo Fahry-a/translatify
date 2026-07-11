@@ -138,6 +138,12 @@ function run() {
             translate();
         }
 
+        if (msgObj.updateDeeplSettings) {
+            console.log("Translatify: DeepL settings updated");
+            restoreLyrics();
+            translate();
+        }
+
         if (msgObj.updateAiThinkMode !== undefined) {
             console.log("Translatify: AI think mode updated to", msgObj.updateAiThinkMode);
             restoreLyrics();

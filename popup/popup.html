@@ -56,8 +56,17 @@
       <h4 data-locale="translationProvider">Translation Provider</h4>
       <select name="translationProvider" id="translationProvider" class="selectOptions">
         <option value="google" data-locale="providerGoogle">Google Translate</option>
+        <option value="deepl" data-locale="providerDeepL">DeepL (DeepLX-compatible)</option>
         <option value="customAI" data-locale="providerCustomAI">Custom AI (OpenAI-compatible)</option>
       </select>
+
+      <div id="deeplSettings" style="display:none;">
+        <h4 class="subtitle" data-locale="deeplEndpoint">DeepLX Endpoint URL</h4>
+        <input type="text" id="deeplEndpoint" class="aiInput" placeholder="https://deeplx.oryn.my.id/deepl">
+        <span class="aiHint" data-locale="deeplEndpointHint">Leave empty to use the default public endpoint. Source language is auto-detected when blank.</span>
+        <button id="deeplTestConnection" data-locale="deeplTestConnection">Test Connection</button>
+        <span id="deeplTestStatus"></span>
+      </div>
 
       <div id="aiSettings" style="display:none;">
         <h4 class="subtitle" data-locale="aiEndpoint">API Endpoint URL</h4>

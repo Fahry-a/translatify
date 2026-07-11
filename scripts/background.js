@@ -17,6 +17,55 @@ const ENDPOINTS = [
     }),
 ];
 
+// Default public DeepLX-compatible endpoint. Overrideable via the popup's
+// "DeepLX Endpoint URL" field. Leaving source_lang empty triggers auto-detection.
+const DEFAULT_DEEPL_ENDPOINT = 'https://deeplx.oryn.my.id/deepl';
+
+// DeepL expects uppercase ISO-639-1 codes (EN, ID, ZH, ...). Regional variants
+// use a hyphen + uppercase region (EN-US, PT-BR). Map the selector's codes.
+const DEEPL_LANG_MAP = {
+    'zh-cn': 'ZH',
+    'zh-tw': 'ZH',
+    'pt': 'PT',
+    'pt-br': 'PT-BR',
+    'pt-pt': 'PT-PT',
+    'en': 'EN',
+    'en-us': 'EN-US',
+    'en-gb': 'EN-GB',
+};
+
+function deeplLangCode(lang) {
+    if (!lang || lang === 'auto') return '';
+    const lower = lang.toLowerCase();
+    if (DEEPL_LANG_MAP[lower]) return DEEPL_LANG_MAP[lower];
+    // Base code uppercased (e.g. "id" -> "ID", "fr" -> "FR")
+    return lower.split('-')[0].toUpperCase();
+}
+
+async function translateWithDeepL(text, sourceLanguage, destinationLanguage) {
+    const { deeplEndpoint } = await chrome.storage.local.get(['deeplEndpoint']);
+    const endpoint = (deeplEndpoint || '').trim() || DEFAULT_DEEPL_ENDPOINT;
+    const url = endpoint.replace(/\/+$/, '');
+
+    const body = { text, target_lang: deeplLangCode(destinationLanguage) };
+    const src = deeplLangCode(sourceLanguage);
+    if (src) body.source_lang = src;
+
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
+    if (!res.ok) throw new Error(`DeepL HTTP ${res.status} ${res.statusText}`);
+    const data = await res.json();
+    // DeepLX responses: { code: 200, data: "..." } or { translations: [...] }
+    if (data && typeof data.data === 'string') return data.data;
+    if (Array.isArray(data?.translations) && data.translations[0]?.text != null) {
+        return data.translations[0].text;
+    }
+    throw new Error(`DeepL unexpected response: ${JSON.stringify(data).slice(0, 200)}`);
+}
+
 const GOOGLE_LANG_MAP = {
     'zh': 'zh-CN',
     'iw': 'he',
@@ -62,6 +111,43 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
             }
             console.error('Translatify: all endpoints failed', { sl, tl, text: msg.text, failures });
             sendResponse({ error: `All endpoints failed (sl=${sl}, tl=${tl}): ${failures.join('; ')}` });
+        })();
+        return true;
+    }
+
+    if (msg.type === 'TRANSLATE_DEEPL') {
+        (async () => {
+            try {
+                const result = await translateWithDeepL(msg.text, msg.sourceLanguage, msg.destinationLanguage);
+                if (result) return sendResponse({ result });
+                sendResponse({ error: 'DeepL returned an empty result' });
+            } catch (e) {
+                console.error('Translatify: DeepL translation failed', { text: msg.text, error: e.message });
+                sendResponse({ error: `DeepL translation failed: ${e.message}` });
+            }
+        })();
+        return true;
+    }
+
+    if (msg.type === 'TEST_DEEPL') {
+        (async () => {
+            try {
+                const endpoint = (msg.endpoint || '').trim() || DEFAULT_DEEPL_ENDPOINT;
+                const url = endpoint.replace(/\/+$/, '');
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: 'Hello', target_lang: 'ID' })
+                });
+                if (!res.ok) return sendResponse({ error: `HTTP ${res.status} ${res.statusText}` });
+                const data = await res.json().catch(() => null);
+                if (data && typeof data.data === 'string') {
+                    return sendResponse({ ok: true });
+                }
+                sendResponse({ error: 'Endpoint did not return a DeepLX-style {data} field' });
+            } catch (e) {
+                sendResponse({ error: e.message });
+            }
         })();
         return true;
     }

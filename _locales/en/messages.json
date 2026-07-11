@@ -68,6 +68,22 @@
         "message": "Custom AI (OpenAI-compatible)",
         "description": "Custom AI provider option"
     },
+    "providerDeepL": {
+        "message": "DeepL (DeepLX-compatible)",
+        "description": "DeepL provider option"
+    },
+    "deeplEndpoint": {
+        "message": "DeepLX Endpoint URL",
+        "description": "Label for DeepLX endpoint input"
+    },
+    "deeplEndpointHint": {
+        "message": "Leave empty to use the default public endpoint. Source language is auto-detected when blank.",
+        "description": "Hint explaining the DeepLX endpoint field"
+    },
+    "deeplTestConnection": {
+        "message": "Test Connection",
+        "description": "Button to test DeepL endpoint connection"
+    },
     "aiEndpoint": {
         "message": "API Endpoint URL",
         "description": "Label for AI API endpoint input"

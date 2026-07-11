@@ -54,5 +54,33 @@
     "translationOff": {
         "message": "Nonaktif",
         "description": "Terjemahan nonaktif"
+    },
+    "translationProvider": {
+        "message": "Penyedia Terjemahan",
+        "description": "Label untuk pemilih penyedia terjemahan"
+    },
+    "providerGoogle": {
+        "message": "Google Translate",
+        "description": "Opsi penyedia Google Translate"
+    },
+    "providerDeepL": {
+        "message": "DeepL (kompatibel DeepLX)",
+        "description": "Opsi penyedia DeepL"
+    },
+    "providerCustomAI": {
+        "message": "AI Kustom (kompatibel OpenAI)",
+        "description": "Opsi penyedia AI kustom"
+    },
+    "deeplEndpoint": {
+        "message": "URL Endpoint DeepLX",
+        "description": "Label untuk input endpoint DeepLX"
+    },
+    "deeplEndpointHint": {
+        "message": "Kosongkan untuk memakai endpoint publik default. Bahasa sumber terdeteksi otomatis bila dikosongkan.",
+        "description": "Petunjuk untuk kolom endpoint DeepLX"
+    },
+    "deeplTestConnection": {
+        "message": "Tes Koneksi",
+        "description": "Tombol untuk mengetes koneksi endpoint DeepL"
     }
 }

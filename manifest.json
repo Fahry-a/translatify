@@ -39,7 +39,8 @@
     "storage"
   ],
   "host_permissions": [
-    "https://translate.googleapis.com/*"
+    "https://translate.googleapis.com/*",
+    "https://deeplx.oryn.my.id/*"
   ],
   "optional_host_permissions": [
     "https://*/*"
