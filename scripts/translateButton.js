@@ -59,6 +59,62 @@ function loadChecker() {
     }
 }
 
+// Re-entrancy guard for ensureTranslateButton(): setupListening() (called from
+// within ensureTranslateButton, which is itself invoked from MutationObserver
+// callbacks) disconnects all observers and creates new ones synchronously —
+// that can re-trigger callbacks mid-inject and recurse. This flag breaks the
+// cycle.
+let ensureInFlight = false;
+
+// Detects whether the translate button is missing from the DOM because Spotify
+// re-rendered the control bar (which happens when Brave's built-in adblock
+// fast-forwards/skips ads, causing a rapid DOM teardown+rebuild). When missing
+// AND a valid repeat button still exists, we re-inject the button and restore
+// its previously-enabled state. This self-heals the most common Brave symptom:
+// "tombol translate hilang setelah lagu berikutnya, harus reload ulang."
+function ensureTranslateButton() {
+    if (!isExtensionAlive()) return;
+    if (ensureInFlight) return; // already re-injecting this tick
+    const existingButton = document.querySelector("button[data-testid='translate-button']");
+    if (existingButton) return; // still present, nothing to do
+
+    const repeatButton = document.querySelector("button[data-testid='control-button-repeat']");
+    const lyricsButton = document.querySelector("button[data-testid='lyrics-button']");
+    if (!repeatButton || !lyricsButton) return; // bar not ready yet
+
+    console.log("Translatify: Translate button missing, re-injecting (likely Brave ad-skip re-render)");
+    ensureInFlight = true;
+    try {
+        eraseButton(); // safety: clear any stale leftover loader
+        addTranslateButton();
+        enableTranslateButton();
+        setupListening();
+        updateTranslateButtonAIState();
+
+        // Re-apply the enabled state from the previous session so the user isn't
+        // forced to click the button again after a silent re-inject.
+        chrome.storage.local.get(["translateButton"]).then((result) => {
+            if (result.translateButton) {
+                toggleTranslateButton();
+            }
+        }).catch(() => {});
+    } finally {
+        ensureInFlight = false;
+    }
+}
+
+// Active observers are tracked here so re-renders don't stack duplicates.
+const translateButtonObservers = new Set();
+
+// Always-disconnected on cleanup, so re-calling setupListening() during a
+// Brave-triggered re-render doesn't leak duplicate observers.
+function disconnectTranslateButtonObservers() {
+    translateButtonObservers.forEach(obs => {
+        try { obs.disconnect(); } catch {}
+    });
+    translateButtonObservers.clear();
+}
+
 // Sets up all the event listeners
 function setupListening() {
     const buttonList = document.querySelectorAll("button");
@@ -74,25 +130,97 @@ function setupListening() {
     translateButton.removeEventListener("change",translate);
     translateButton.removeEventListener("click",translate);
     
-    // Listen for changes in the now playing widget
-    var nowPlayingObserver = new MutationObserver(function(mutationsList, nowPlayingObserver) {
-        setTimeout(translate, 100);
-        console.log('Translatify: Next music');
-    });
-    nowPlayingObserver.observe(nowPlaying, { attributes: true});
+    // Clean up any previous observers before creating new ones. Spotify's SPA
+    // re-renders (especially fast-forwarded by Brave's adblock) can call this
+    // again on a fresh button bar; without cleanup we'd double-bind.
+    disconnectTranslateButtonObservers();
+
+    // Listen for changes in the now playing widget.
+    // Brave's adblock fast-forwards ads, so Spotify swaps the now-playing widget
+    // out and back in very quickly. Observing the whole subtree (not just
+    // attributes) lets us catch child-list churn the original {attributes:true}
+    // only config missed.
+    if (nowPlaying) {
+        const isNowPlayingStale = () => !document.body.contains(nowPlaying);
+
+        var nowPlayingObserver = new MutationObserver(function(mutationsList, nowPlayingObserver) {
+            // Self-heal: if Spotify replaced the now-playing widget, re-attach.
+            if (isNowPlayingStale()) {
+                nowPlayingObserver.disconnect();
+                const freshNowPlaying = document.querySelector("div[data-testid='now-playing-widget']");
+                if (freshNowPlaying) {
+                    nowPlayingObserver.observe(freshNowPlaying, { attributes: true, subtree: true, childList: true });
+                    console.log('Translatify: Re-attached now-playing observer after re-render');
+                }
+                ensureTranslateButton();
+            }
+            setTimeout(translate, 100);
+            console.log('Translatify: Next music');
+        });
+        nowPlayingObserver.observe(nowPlaying, { attributes: true, subtree: true, childList: true });
+        translateButtonObservers.add(nowPlayingObserver);
+    }
 
     // Listen for changes in the button bar
-    const rightButtonBar = lyricsButton.parentNode;
-    // Only works on the button bar
-    var rightButtonBarObserver = new MutationObserver(function(mutationsList, rightButtonBarObserver) {
-        console.log('Translatify: Button bar changed');
-        setTimeout(enableTranslateButton, 0);
-        translate();
-        
-    });
-    rightButtonBarObserver.observe(rightButtonBar, { subtree: true, childList: true});
+    if (lyricsButton && lyricsButton.parentNode) {
+        const rightButtonBar = lyricsButton.parentNode;
+        const isRightButtonBarStale = () => !document.body.contains(rightButtonBar);
 
+        var rightButtonBarObserver = new MutationObserver(function(mutationsList, rightButtonBarObserver) {
+            console.log('Translatify: Button bar changed');
 
+            // Self-heal: if Spotify replaced the button bar, our observed node
+            // is detached (stale). Re-attach to the fresh bar and re-inject the
+            // translate button if it's gone — this is the Brave ad-skip case.
+            if (isRightButtonBarStale()) {
+                rightButtonBarObserver.disconnect();
+                const freshLyricsButton = document.querySelector("button[data-testid='lyrics-button']");
+                if (freshLyricsButton && freshLyricsButton.parentNode) {
+                    rightButtonBarObserver.observe(freshLyricsButton.parentNode, { subtree: true, childList: true });
+                    console.log('Translatify: Re-attached button-bar observer after re-render');
+                }
+                ensureTranslateButton();
+                return;
+            }
+
+            // The bar still exists but the translate button may have been
+            // removed by Spotify's re-render — ensure it's present.
+            ensureTranslateButton();
+            setTimeout(enableTranslateButton, 0);
+            translate();
+        });
+        rightButtonBarObserver.observe(rightButtonBar, { subtree: true, childList: true});
+        translateButtonObservers.add(rightButtonBarObserver);
+    }
+
+    // Global safety-net observer: watches the whole main view for the button bar
+    // disappearing altogether. If the now-playing / button-bar observers above
+    // both got detached (e.g. cosmetic-filter re-render blown away the parents),
+    // this catches it and re-runs the full setup.
+    const mainView = document.querySelector("#main-view") || document.querySelector("#main") || document.body;
+    if (mainView) {
+        const safetyObserver = new MutationObserver(function() {
+            ensureTranslateButton();
+        });
+        safetyObserver.observe(mainView, { subtree: true, childList: true });
+        translateButtonObservers.add(safetyObserver);
+    }
+
+    // Periodic safety-net: some Brave cosmetic-filter passes mutate the DOM in
+    // ways MutationObserver batches drop (synchronous attribute removal during
+    // blocked-script execution). A lightweight poll recovers the button even
+    // when observers miss it. Stops once the button gate inside ensureTranslateButton
+    // does all the work.
+    if (!window.__translatifySafetyInterval) {
+        window.__translatifySafetyInterval = setInterval(() => {
+            if (!isExtensionAlive()) {
+                clearInterval(window.__translatifySafetyInterval);
+                window.__translatifySafetyInterval = null;
+                return;
+            }
+            ensureTranslateButton();
+        }, 3000);
+    }
 }
 
 // Translates the lyrics

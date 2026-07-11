@@ -139,7 +139,7 @@ function run() {
         }
 
         if (msgObj.updateDeeplSettings) {
-            console.log("Translatify: DeepL settings updated");
+            console.log("Translatify: DeepLX settings updated");
             restoreLyrics();
             translate();
         }

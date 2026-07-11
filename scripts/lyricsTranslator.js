@@ -38,7 +38,7 @@ let aiFailoverEnabled = true;
 
 // Active translation provider for the current pass. "google" uses TRANSLATE messages
 // (Google endpoints); "deepl" routes the same line-by-line path through TRANSLATE_DEEPL
-// (a DeepLX-compatible endpoint). "customAI" is handled separately via the batch flow.
+// (the DeepLX endpoint — no API key required). "customAI" is handled separately via the batch flow.
 let activeProvider = 'google';
 
 // Re-entrancy guard for translate(), set before any await.

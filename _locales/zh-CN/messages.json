@@ -68,8 +68,8 @@
         "description": "Custom AI provider option"
     },
     "providerDeepL": {
-        "message": "DeepL（兼容 DeepLX）",
-        "description": "DeepL provider option"
+        "message": "DeepLX",
+        "description": "DeepLX provider option"
     },
     "deeplEndpoint": {
         "message": "DeepLX 端点地址",
@@ -81,7 +81,7 @@
     },
     "deeplTestConnection": {
         "message": "测试连接",
-        "description": "Button to test DeepL endpoint connection"
+        "description": "Button to test DeepLX endpoint connection"
     },
     "aiEndpoint": {
         "message": "API 端点地址",

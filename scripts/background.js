@@ -17,19 +17,19 @@ const ENDPOINTS = [
     }),
 ];
 
-// Default public DeepLX-compatible endpoint. Overrideable via the popup's
+// Default public DeepLX endpoint. Overrideable via the popup's
 // "DeepLX Endpoint URL" field. Leaving source_lang empty triggers auto-detection.
 const DEFAULT_DEEPL_ENDPOINT = 'https://deeplx.oryn.my.id/deepl';
 
-// DeepL expects uppercase ISO-639-1 codes (EN, ID, ZH, ...). Regional variants
-// use a hyphen + uppercase region (EN-US, PT-BR). DeepL also accepts a few
+// DeepLX expects uppercase ISO-639-1 codes (EN, ID, ZH, ...). Regional variants
+// use a hyphen + uppercase region (EN-US, PT-BR). DeepLX also accepts a few
 // 3-letter codes (BHO, CEB, CKB, GOM, KMR, YUE, ...) and language aliases that do
 // NOT follow the simple "uppercase the base code" rule used by the fallback.
 //
 // Only map entries that differ from the fallback to avoid noise. See the full
-// list of supported DeepL languages in deeplx-lang.md.
+// list of supported DeepLX languages in deeplx-lang.md.
 const DEEPL_LANG_MAP = {
-    // Regional/variant codes where DeepL diverges from the simple fallback.
+    // Regional/variant codes where DeepLX diverges from the simple fallback.
     'zh-cn': 'ZH',
     'zh-tw': 'ZH',
     'pt': 'PT',
@@ -38,14 +38,14 @@ const DEEPL_LANG_MAP = {
     'en': 'EN',
     'en-us': 'EN-US',
     'en-gb': 'EN-GB',
-    // Aliases — these selector codes map to a DIFFERENT DeepL code than the
+    // Aliases — these selector codes map to a DIFFERENT DeepLX code than the
     // naive uppercased base code would produce.
-    'fil': 'TL',   // Filipino  -> DeepL's Tagalog (TL), not "FIL"
-    'no': 'NB',    // Norwegian -> DeepL's Norwegian Bokmål (NB), not "NO"
-    'ku': 'KMR',   // Kurdish   -> DeepL's Kurmanji (KMR), not "KU"
-    // 3-letter codes supported by DeepL. The fallback would actually produce
+    'fil': 'TL',   // Filipino  -> DeepLX's Tagalog (TL), not "FIL"
+    'no': 'NB',    // Norwegian -> DeepLX's Norwegian Bokmål (NB), not "NO"
+    'ku': 'KMR',   // Kurdish   -> DeepLX's Kurmanji (KMR), not "KU"
+    // 3-letter codes supported by DeepLX. The fallback would actually produce
     // these correctly, but listing them here guards against case/quoting issues
-    // and documents which 3-letter selector values are DeepL-compatible.
+    // and documents which 3-letter selector values are DeepLX-compatible.
     'bho': 'BHO',
     'ceb': 'CEB',
     'ckb': 'CKB',
@@ -80,14 +80,14 @@ async function translateWithDeepL(text, sourceLanguage, destinationLanguage) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
     });
-    if (!res.ok) throw new Error(`DeepL HTTP ${res.status} ${res.statusText}`);
+    if (!res.ok) throw new Error(`DeepLX HTTP ${res.status} ${res.statusText}`);
     const data = await res.json();
     // DeepLX responses: { code: 200, data: "..." } or { translations: [...] }
     if (data && typeof data.data === 'string') return data.data;
     if (Array.isArray(data?.translations) && data.translations[0]?.text != null) {
         return data.translations[0].text;
     }
-    throw new Error(`DeepL unexpected response: ${JSON.stringify(data).slice(0, 200)}`);
+    throw new Error(`DeepLX unexpected response: ${JSON.stringify(data).slice(0, 200)}`);
 }
 
 const GOOGLE_LANG_MAP = {
@@ -144,10 +144,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
             try {
                 const result = await translateWithDeepL(msg.text, msg.sourceLanguage, msg.destinationLanguage);
                 if (result) return sendResponse({ result });
-                sendResponse({ error: 'DeepL returned an empty result' });
+                sendResponse({ error: 'DeepLX returned an empty result' });
             } catch (e) {
-                console.error('Translatify: DeepL translation failed', { text: msg.text, error: e.message });
-                sendResponse({ error: `DeepL translation failed: ${e.message}` });
+                console.error('Translatify: DeepLX translation failed', { text: msg.text, error: e.message });
+                sendResponse({ error: `DeepLX translation failed: ${e.message}` });
             }
         })();
         return true;

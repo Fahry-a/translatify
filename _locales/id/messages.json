@@ -64,8 +64,8 @@
         "description": "Opsi penyedia Google Translate"
     },
     "providerDeepL": {
-        "message": "DeepL (kompatibel DeepLX)",
-        "description": "Opsi penyedia DeepL"
+        "message": "DeepLX",
+        "description": "Opsi penyedia DeepLX"
     },
     "providerCustomAI": {
         "message": "AI Kustom (kompatibel OpenAI)",
@@ -81,6 +81,6 @@
     },
     "deeplTestConnection": {
         "message": "Tes Koneksi",
-        "description": "Tombol untuk mengetes koneksi endpoint DeepL"
+        "description": "Tombol untuk mengetes koneksi endpoint DeepLX"
     }
 }
