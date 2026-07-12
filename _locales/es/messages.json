@@ -9,50 +9,170 @@
     },
     "targetLanguage": {
         "message": "Idioma de destino",
-        "description": "Idioma de destino"
+        "description": "Target language"
     },
     "applyLanguage": {
         "message": "Aplicar selección de idioma",
-        "description": "Aplicar selección de idioma"
+        "description": "Apply language selection"
     },
     "lyricsMode": {
         "message": "Modo de visualización de letras",
-        "description": "Modo de visualización de letras"
+        "description": "Lyrics mode"
     },
     "along": {
         "message": "Mostrar letras traducidas junto a las originales",
-        "description": "Mostrar letras traducidas junto a las originales"
+        "description": "Show translated lyrics along original"
     },
     "replace": {
         "message": "Reemplazar letras con la traducción",
-        "description": "Reemplazar letras con la traducción"
+        "description": "Replace lyrics with translation"
     },
     "lyricsSize": {
         "message": "Tamaño de fuente de las letras traducidas",
-        "description": "Tamaño de fuente de las letras traducidas"
+        "description": "Font size of translated lyrics"
     },
     "toggleTip": {
-        "message": "- 🎵 ¡Activa el botón de traducción en la barra de control del reproductor!",
-        "description": "Consejo sobre cómo activar"
+        "message": "- 🎵 ¡Activa el botón de traducción en la barra de control del reproductor! ",
+        "description": "toggle tip"
     },
     "githubRepo": {
         "message": "¡Revisa el repositorio de GitHub de código abierto!",
-        "description": "Repositorio de GitHub"
+        "description": "github repo"
     },
     "reviewLink": {
         "message": "★ ¡Deja una reseña!",
-        "description": "Enlace para dejar una reseña en la Chrome Web Store"
+        "description": "Chrome Web Store review link"
     },
     "translateToggle": {
         "message": "Activar Traducción",
-        "description": "Interruptor para activar/desactivar la traducción"
+        "description": "Toggle for enabling/disabling translation"
     },
     "translationOn": {
         "message": "Activado",
-        "description": "Estado activado de la traducción"
+        "description": "Translation toggle - on state"
     },
     "translationOff": {
         "message": "Desactivado",
-        "description": "Estado desactivado de la traducción"
+        "description": "Translation toggle - off state"
+    },
+    "translationProvider": {
+        "message": "Proveedor de traducción",
+        "description": "Label for translation provider selector"
+    },
+    "providerGoogle": {
+        "message": "Google Translate",
+        "description": "Google Translate provider option"
+    },
+    "providerCustomAI": {
+        "message": "IA personalizada (compatible con OpenAI)",
+        "description": "Custom AI provider option"
+    },
+    "providerDeepL": {
+        "message": "DeepLX",
+        "description": "DeepLX provider option"
+    },
+    "deeplEndpoint": {
+        "message": "URL del endpoint de DeepLX",
+        "description": "Label for DeepLX endpoint input"
+    },
+    "deeplEndpointHint": {
+        "message": "Introduce un endpoint compatible con DeepLX (autoalojado o una instancia pública — consulta la wiki para opciones).",
+        "description": "Hint explaining the DeepLX endpoint field"
+    },
+    "deeplTestConnection": {
+        "message": "Probar conexión",
+        "description": "Button to test DeepLX endpoint connection"
+    },
+    "aiEndpoint": {
+        "message": "URL del endpoint de la API",
+        "description": "Label for AI API endpoint input"
+    },
+    "aiEndpointPlaceholder": {
+        "message": "https://api.openai.com/v1",
+        "description": "Placeholder for AI endpoint input"
+    },
+    "aiEndpointHint": {
+        "message": "/chat/completions se añadirá a esta URL",
+        "description": "Hint explaining that /chat/completions is appended to the endpoint URL"
+    },
+    "aiApiKey": {
+        "message": "Clave de API",
+        "description": "Label for AI API key input"
+    },
+    "aiModel": {
+        "message": "Nombre del modelo",
+        "description": "Label for AI model name input"
+    },
+    "aiModelPlaceholder": {
+        "message": "gpt-4o-mini",
+        "description": "Placeholder for AI model input"
+    },
+    "aiTestConnection": {
+        "message": "Probar conexión",
+        "description": "Button to test AI API connection"
+    },
+    "aiTestSuccess": {
+        "message": "¡Conexión exitosa!",
+        "description": "Success message for AI connection test"
+    },
+    "aiTestFail": {
+        "message": "Conexión fallida. Revisa tu configuración.",
+        "description": "Failure message for AI connection test"
+    },
+    "aiTestInProgress": {
+        "message": "Probando...",
+        "description": "Progress message for AI connection test"
+    },
+    "aiTranslating": {
+        "message": "Traduciendo con IA...",
+        "description": "Message shown while AI translation is in progress"
+    },
+    "aiThinkMode": {
+        "message": "Modo de razonamiento",
+        "description": "Label for AI thinking mode toggle"
+    },
+    "thinkModeOn": {
+        "message": "Activado",
+        "description": "Thinking mode toggle - on state"
+    },
+    "thinkModeOff": {
+        "message": "Desactivado",
+        "description": "Thinking mode toggle - off state"
+    },
+    "aiFailover": {
+        "message": "Vista previa instantánea",
+        "description": "Label for the AI failover toggle"
+    },
+    "failoverOn": {
+        "message": "Activado",
+        "description": "Failover toggle - on state"
+    },
+    "failoverOff": {
+        "message": "Desactivado",
+        "description": "Failover toggle - off state"
+    },
+    "clearSongCache": {
+        "message": "Borrar caché de la canción actual",
+        "description": "Button to clear the cached translations for the current song"
+    },
+    "clearAllCache": {
+        "message": "Borrar toda la caché",
+        "description": "Button to clear all cached translations"
+    },
+    "debugTitle": {
+        "message": "Depuración",
+        "description": "Title for the debug section"
+    },
+    "clearStorage": {
+        "message": "Borrar almacenamiento de la extensión",
+        "description": "Debug button to clear all saved extension settings"
+    },
+    "clearStorageHint": {
+        "message": "Borra todos los ajustes guardados: idioma de destino, modo y tamaño de fuente de las letras, proveedor de traducción y tu endpoint de IA, clave de API, modelo y conmutadores. La extensión vuelve a los valores predeterminados.",
+        "description": "Explanation of what clearing the extension storage removes"
+    },
+    "confirmClear": {
+        "message": "Haz clic de nuevo para confirmar",
+        "description": "Confirmation prompt shown on a clear-cache button after the first click"
     }
 }

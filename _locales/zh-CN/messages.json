@@ -32,7 +32,7 @@
         "description": "Font size of translated lyrics"
     },
     "toggleTip": {
-        "message": "- 🎵 点击播放控制条上的翻译按钮进行切换！",
+        "message": "- 🎵 点击播放控制条上的翻译按钮进行切换！ ",
         "description": "toggle tip"
     },
     "githubRepo": {
@@ -76,7 +76,7 @@
         "description": "Label for DeepLX endpoint input"
     },
     "deeplEndpointHint": {
-        "message": "留空则使用默认公共端点。源语言留空时自动检测。",
+        "message": "请输入兼容 DeepLX 的端点（可自建，或使用公共实例——详见 wiki）。",
         "description": "Hint explaining the DeepLX endpoint field"
     },
     "deeplTestConnection": {
@@ -138,5 +138,41 @@
     "thinkModeOff": {
         "message": "关闭",
         "description": "Thinking mode toggle - off state"
+    },
+    "aiFailover": {
+        "message": "即时预览",
+        "description": "Label for the AI failover toggle"
+    },
+    "failoverOn": {
+        "message": "开启",
+        "description": "Failover toggle - on state"
+    },
+    "failoverOff": {
+        "message": "关闭",
+        "description": "Failover toggle - off state"
+    },
+    "clearSongCache": {
+        "message": "清除当前歌曲缓存",
+        "description": "Button to clear the cached translations for the current song"
+    },
+    "clearAllCache": {
+        "message": "清除所有缓存",
+        "description": "Button to clear all cached translations"
+    },
+    "debugTitle": {
+        "message": "调试",
+        "description": "Title for the debug section"
+    },
+    "clearStorage": {
+        "message": "清除扩展存储",
+        "description": "Debug button to clear all saved extension settings"
+    },
+    "clearStorageHint": {
+        "message": "清除所有已保存的设置：目标语言、歌词模式和字体大小、翻译提供商，以及您的 AI 端点、API 密钥、模型和开关。扩展将恢复为默认设置。",
+        "description": "Explanation of what clearing the extension storage removes"
+    },
+    "confirmClear": {
+        "message": "再次点击以确认",
+        "description": "Confirmation prompt shown on a clear-cache button after the first click"
     }
 }

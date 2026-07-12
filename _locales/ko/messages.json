@@ -32,7 +32,7 @@
         "description": "Font size of translated lyrics"
     },
     "toggleTip": {
-        "message": "- 🎵 플레이어 컨트롤 바의 번역 버튼으로 설정해 보세요!",
+        "message": "- 🎵 플레이어 컨트롤 바의 번역 버튼으로 설정해 보세요! ",
         "description": "toggle tip"
     },
     "githubRepo": {
@@ -54,5 +54,125 @@
     "translationOff": {
         "message": "끔",
         "description": "Translation toggle - off state"
+    },
+    "translationProvider": {
+        "message": "번역 제공자",
+        "description": "Label for translation provider selector"
+    },
+    "providerGoogle": {
+        "message": "Google 번역",
+        "description": "Google Translate provider option"
+    },
+    "providerCustomAI": {
+        "message": "커스텀 AI (OpenAI 호환)",
+        "description": "Custom AI provider option"
+    },
+    "providerDeepL": {
+        "message": "DeepLX",
+        "description": "DeepLX provider option"
+    },
+    "deeplEndpoint": {
+        "message": "DeepLX 엔드포인트 URL",
+        "description": "Label for DeepLX endpoint input"
+    },
+    "deeplEndpointHint": {
+        "message": "DeepLX 호환 엔드포인트를 입력하세요 (자체 호스팅 또는 공개 인스턴스 — 옵션은 wiki 참조).",
+        "description": "Hint explaining the DeepLX endpoint field"
+    },
+    "deeplTestConnection": {
+        "message": "연결 테스트",
+        "description": "Button to test DeepLX endpoint connection"
+    },
+    "aiEndpoint": {
+        "message": "API 엔드포인트 URL",
+        "description": "Label for AI API endpoint input"
+    },
+    "aiEndpointPlaceholder": {
+        "message": "https://api.openai.com/v1",
+        "description": "Placeholder for AI endpoint input"
+    },
+    "aiEndpointHint": {
+        "message": "/chat/completions 이 URL에 추가됩니다",
+        "description": "Hint explaining that /chat/completions is appended to the endpoint URL"
+    },
+    "aiApiKey": {
+        "message": "API 키",
+        "description": "Label for AI API key input"
+    },
+    "aiModel": {
+        "message": "모델 이름",
+        "description": "Label for AI model name input"
+    },
+    "aiModelPlaceholder": {
+        "message": "gpt-4o-mini",
+        "description": "Placeholder for AI model input"
+    },
+    "aiTestConnection": {
+        "message": "연결 테스트",
+        "description": "Button to test AI API connection"
+    },
+    "aiTestSuccess": {
+        "message": "연결 성공!",
+        "description": "Success message for AI connection test"
+    },
+    "aiTestFail": {
+        "message": "연결 실패. 설정을 확인하세요.",
+        "description": "Failure message for AI connection test"
+    },
+    "aiTestInProgress": {
+        "message": "테스트 중...",
+        "description": "Progress message for AI connection test"
+    },
+    "aiTranslating": {
+        "message": "AI로 번역 중...",
+        "description": "Message shown while AI translation is in progress"
+    },
+    "aiThinkMode": {
+        "message": "사고 모드",
+        "description": "Label for AI thinking mode toggle"
+    },
+    "thinkModeOn": {
+        "message": "켬",
+        "description": "Thinking mode toggle - on state"
+    },
+    "thinkModeOff": {
+        "message": "끔",
+        "description": "Thinking mode toggle - off state"
+    },
+    "aiFailover": {
+        "message": "인스턴트 미리보기",
+        "description": "Label for the AI failover toggle"
+    },
+    "failoverOn": {
+        "message": "켬",
+        "description": "Failover toggle - on state"
+    },
+    "failoverOff": {
+        "message": "끔",
+        "description": "Failover toggle - off state"
+    },
+    "clearSongCache": {
+        "message": "현재 곡 캐시 지우기",
+        "description": "Button to clear the cached translations for the current song"
+    },
+    "clearAllCache": {
+        "message": "모든 캐시 지우기",
+        "description": "Button to clear all cached translations"
+    },
+    "debugTitle": {
+        "message": "디버그",
+        "description": "Title for the debug section"
+    },
+    "clearStorage": {
+        "message": "확장 프로그램 저장공간 지우기",
+        "description": "Debug button to clear all saved extension settings"
+    },
+    "clearStorageHint": {
+        "message": "저장된 모든 설정을 삭제합니다: 대상 언어, 가사 모드 및 글꼴 크기, 번역 제공자, 그리고 AI 엔드포인트, API 키, 모델 및 토글. 확장 프로그램이 기본값으로 재설정됩니다.",
+        "description": "Explanation of what clearing the extension storage removes"
+    },
+    "confirmClear": {
+        "message": "다시 클릭하여 확인하세요",
+        "description": "Confirmation prompt shown on a clear-cache button after the first click"
     }
 }

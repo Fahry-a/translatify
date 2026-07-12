@@ -32,7 +32,7 @@
         "description": "Font size of translated lyrics"
     },
     "toggleTip": {
-        "message": "- 🎵 プレイヤーのコントロールバーにある翻訳ボタンで切り替え！",
+        "message": "- 🎵 プレイヤーのコントロールバーにある翻訳ボタンで切り替え！ ",
         "description": "toggle tip"
     },
     "githubRepo": {
@@ -54,5 +54,125 @@
     "translationOff": {
         "message": "オフ",
         "description": "Translation toggle - off state"
+    },
+    "translationProvider": {
+        "message": "翻訳プロバイダー",
+        "description": "Label for translation provider selector"
+    },
+    "providerGoogle": {
+        "message": "Google 翻訳",
+        "description": "Google Translate provider option"
+    },
+    "providerCustomAI": {
+        "message": "カスタム AI（OpenAI 互換）",
+        "description": "Custom AI provider option"
+    },
+    "providerDeepL": {
+        "message": "DeepLX",
+        "description": "DeepLX provider option"
+    },
+    "deeplEndpoint": {
+        "message": "DeepLX エンドポイント URL",
+        "description": "Label for DeepLX endpoint input"
+    },
+    "deeplEndpointHint": {
+        "message": "DeepLX 互換のエンドポイントを入力してください（自己ホストまたは公開インスタンス — オプションは wiki を参照）。",
+        "description": "Hint explaining the DeepLX endpoint field"
+    },
+    "deeplTestConnection": {
+        "message": "接続テスト",
+        "description": "Button to test DeepLX endpoint connection"
+    },
+    "aiEndpoint": {
+        "message": "API エンドポイント URL",
+        "description": "Label for AI API endpoint input"
+    },
+    "aiEndpointPlaceholder": {
+        "message": "https://api.openai.com/v1",
+        "description": "Placeholder for AI endpoint input"
+    },
+    "aiEndpointHint": {
+        "message": "/chat/completions がこの URL に追加されます",
+        "description": "Hint explaining that /chat/completions is appended to the endpoint URL"
+    },
+    "aiApiKey": {
+        "message": "API キー",
+        "description": "Label for AI API key input"
+    },
+    "aiModel": {
+        "message": "モデル名",
+        "description": "Label for AI model name input"
+    },
+    "aiModelPlaceholder": {
+        "message": "gpt-4o-mini",
+        "description": "Placeholder for AI model input"
+    },
+    "aiTestConnection": {
+        "message": "接続テスト",
+        "description": "Button to test AI API connection"
+    },
+    "aiTestSuccess": {
+        "message": "接続に成功しました！",
+        "description": "Success message for AI connection test"
+    },
+    "aiTestFail": {
+        "message": "接続に失敗しました。設定を確認してください。",
+        "description": "Failure message for AI connection test"
+    },
+    "aiTestInProgress": {
+        "message": "テスト中...",
+        "description": "Progress message for AI connection test"
+    },
+    "aiTranslating": {
+        "message": "AI で翻訳中...",
+        "description": "Message shown while AI translation is in progress"
+    },
+    "aiThinkMode": {
+        "message": "思考モード",
+        "description": "Label for AI thinking mode toggle"
+    },
+    "thinkModeOn": {
+        "message": "オン",
+        "description": "Thinking mode toggle - on state"
+    },
+    "thinkModeOff": {
+        "message": "オフ",
+        "description": "Thinking mode toggle - off state"
+    },
+    "aiFailover": {
+        "message": "インスタントプレビュー",
+        "description": "Label for the AI failover toggle"
+    },
+    "failoverOn": {
+        "message": "オン",
+        "description": "Failover toggle - on state"
+    },
+    "failoverOff": {
+        "message": "オフ",
+        "description": "Failover toggle - off state"
+    },
+    "clearSongCache": {
+        "message": "現在の曲のキャッシュをクリア",
+        "description": "Button to clear the cached translations for the current song"
+    },
+    "clearAllCache": {
+        "message": "すべてのキャッシュをクリア",
+        "description": "Button to clear all cached translations"
+    },
+    "debugTitle": {
+        "message": "デバッグ",
+        "description": "Title for the debug section"
+    },
+    "clearStorage": {
+        "message": "拡張機能のストレージをクリア",
+        "description": "Debug button to clear all saved extension settings"
+    },
+    "clearStorageHint": {
+        "message": "保存されたすべての設定を消去します：対象言語、歌詞モードとフォントサイズ、翻訳プロバイダー、および AI エンドポイント、API キー、モデル、トグル。拡張機能はデフォルトにリセットされます。",
+        "description": "Explanation of what clearing the extension storage removes"
+    },
+    "confirmClear": {
+        "message": "もう一度クリックして確認",
+        "description": "Confirmation prompt shown on a clear-cache button after the first click"
     }
 }
