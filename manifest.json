@@ -39,13 +39,10 @@
     "storage"
   ],
   "host_permissions": [
-    "https://translate.googleapis.com/*",
-    "https://deeplx.oryn.my.id/*"
+    "https://translate.googleapis.com/*"
   ],
   "optional_host_permissions": [
-    "https://*/*",
-    "http://localhost/*",
-    "http://127.0.0.1/*"
+    "https://*/*"
   ],
   "browser_specific_settings": {
     "gecko": {

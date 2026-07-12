@@ -77,7 +77,7 @@
         "description": "Label for DeepLX endpoint input"
     },
     "deeplEndpointHint": {
-        "message": "Leave empty to use the default public endpoint. Source language is auto-detected when blank.",
+        "message": "Enter a DeepLX-compatible endpoint (self-hosted or a public instance — see the wiki for options).",
         "description": "Hint explaining the DeepLX endpoint field"
     },
     "deeplTestConnection": {

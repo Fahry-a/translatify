@@ -17,9 +17,10 @@ const ENDPOINTS = [
     }),
 ];
 
-// Default public DeepLX endpoint. Overrideable via the popup's
-// "DeepLX Endpoint URL" field. Leaving source_lang empty triggers auto-detection.
-const DEFAULT_DEEPL_ENDPOINT = 'https://deeplx.oryn.my.id/deepl';
+// No default endpoint is bundled — the user must configure a DeepLX-compatible
+// endpoint themselves via the popup's "DeepLX Endpoint URL" field. This keeps
+// the choice of which server receives lyrics text an explicit, conscious one.
+// Leaving source_lang empty triggers auto-detection.
 
 // DeepLX expects uppercase ISO-639-1 codes (EN, ID, ZH, ...). Regional variants
 // use a hyphen + uppercase region (EN-US, PT-BR). DeepLX also accepts a few
@@ -68,7 +69,8 @@ function deeplLangCode(lang) {
 
 async function translateWithDeepL(text, sourceLanguage, destinationLanguage) {
     const { deeplEndpoint } = await chrome.storage.local.get(['deeplEndpoint']);
-    const endpoint = (deeplEndpoint || '').trim() || DEFAULT_DEEPL_ENDPOINT;
+    const endpoint = (deeplEndpoint || '').trim();
+    if (!endpoint) throw new Error('No DeepLX endpoint configured. Set one in the extension settings.');
     const url = endpoint.replace(/\/+$/, '');
 
     const body = { text, target_lang: deeplLangCode(destinationLanguage) };
@@ -156,7 +158,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.type === 'TEST_DEEPL') {
         (async () => {
             try {
-                const endpoint = (msg.endpoint || '').trim() || DEFAULT_DEEPL_ENDPOINT;
+                const endpoint = (msg.endpoint || '').trim();
+                if (!endpoint) return sendResponse({ error: 'No DeepLX endpoint configured.' });
                 const url = endpoint.replace(/\/+$/, '');
                 const res = await fetch(url, {
                     method: 'POST',
