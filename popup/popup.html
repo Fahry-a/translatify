@@ -56,17 +56,17 @@
       <h4 data-locale="translationProvider">Translation Provider</h4>
       <select name="translationProvider" id="translationProvider" class="selectOptions">
         <option value="google" data-locale="providerGoogle">Google Translate</option>
-        <option value="deepl" data-locale="providerDeepL">DeepLX</option>
+        <option value="dlx" data-locale="providerDlx">DLX</option>
         <option value="customAI" data-locale="providerCustomAI">Custom AI (OpenAI-compatible)</option>
       </select>
 
-      <div id="deeplSettings" style="display:none;">
-        <h4 class="subtitle" data-locale="deeplEndpoint">DeepLX Endpoint URL</h4>
+      <div id="dlxSettings" style="display:none;">
+        <h4 class="subtitle" data-locale="dlxEndpoint">DLX Endpoint URL</h4>
        
-        <input type="text" id="deeplEndpoint" class="aiInput" placeholder="https://your-deeplx-instance.example.com/translate">
-        <span class="aiHint" data-locale="deeplEndpointHint">Enter a DeepLX-compatible endpoint (self-hosted or a public instance — see the wiki for options).</span>
-        <button id="deeplTestConnection" data-locale="deeplTestConnection">Test Connection</button>
-        <span id="deeplTestStatus"></span>
+        <input type="text" id="dlxEndpoint" class="aiInput" placeholder="https://your-dlx-instance.example.com/translate">
+        <span class="aiHint" data-locale="dlxEndpointHint">Enter a DLX-compatible endpoint (self-hosted or a public instance — see the wiki for options).</span>
+        <button id="dlxTestConnection" data-locale="dlxTestConnection">Test Connection</button>
+        <span id="dlxTestStatus"></span>
       </div>
 
       <div id="aiSettings" style="display:none;">

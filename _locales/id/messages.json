@@ -67,21 +67,21 @@
         "message": "AI Kustom (kompatibel OpenAI)",
         "description": "Custom AI provider option"
     },
-    "providerDeepL": {
-        "message": "DeepLX",
-        "description": "DeepLX provider option"
+    "providerDlx": {
+        "message": "DLX",
+        "description": "DLX provider option"
     },
-    "deeplEndpoint": {
-        "message": "URL Endpoint DeepLX",
-        "description": "Label for DeepLX endpoint input"
+    "dlxEndpoint": {
+        "message": "URL Endpoint DLX",
+        "description": "Label for DLX endpoint input"
     },
-    "deeplEndpointHint": {
-        "message": "Masukkan endpoint yang kompatibel dengan DeepLX (self-hosted atau instance publik — lihat wiki untuk pilihannya).",
-        "description": "Hint explaining the DeepLX endpoint field"
+    "dlxEndpointHint": {
+        "message": "Masukkan endpoint yang kompatibel dengan DLX (self-hosted atau instance publik — lihat wiki untuk pilihannya).",
+        "description": "Hint explaining the DLX endpoint field"
     },
-    "deeplTestConnection": {
+    "dlxTestConnection": {
         "message": "Tes Koneksi",
-        "description": "Button to test DeepLX endpoint connection"
+        "description": "Button to test DLX endpoint connection"
     },
     "aiEndpoint": {
         "message": "URL Endpoint API",

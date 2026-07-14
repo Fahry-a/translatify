@@ -138,8 +138,8 @@ function run() {
             translate();
         }
 
-        if (msgObj.updateDeeplSettings) {
-            console.log("Translatify: DeepLX settings updated");
+        if (msgObj.updateDlxSettings) {
+            console.log("Translatify: DLX settings updated");
             restoreLyrics();
             translate();
         }

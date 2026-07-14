@@ -17,20 +17,20 @@ const ENDPOINTS = [
     }),
 ];
 
-// No default endpoint is bundled — the user must configure a DeepLX-compatible
-// endpoint themselves via the popup's "DeepLX Endpoint URL" field. This keeps
+// No default endpoint is bundled — the user must configure a DLX-compatible
+// endpoint themselves via the popup's "DLX Endpoint URL" field. This keeps
 // the choice of which server receives lyrics text an explicit, conscious one.
 // Leaving source_lang empty triggers auto-detection.
 
-// DeepLX expects uppercase ISO-639-1 codes (EN, ID, ZH, ...). Regional variants
-// use a hyphen + uppercase region (EN-US, PT-BR). DeepLX also accepts a few
+// DLX expects uppercase ISO-639-1 codes (EN, ID, ZH, ...). Regional variants
+// use a hyphen + uppercase region (EN-US, PT-BR). DLX also accepts a few
 // 3-letter codes (BHO, CEB, CKB, GOM, KMR, YUE, ...) and language aliases that do
 // NOT follow the simple "uppercase the base code" rule used by the fallback.
 //
 // Only map entries that differ from the fallback to avoid noise. See the full
-// list of supported DeepLX languages in deeplx-lang.md.
-const DEEPL_LANG_MAP = {
-    // Regional/variant codes where DeepLX diverges from the simple fallback.
+// list of supported DLX languages in dlx-lang.md.
+const DLX_LANG_MAP = {
+    // Regional/variant codes where DLX diverges from the simple fallback.
     'zh-cn': 'ZH',
     'zh-tw': 'ZH',
     'pt': 'PT',
@@ -39,14 +39,14 @@ const DEEPL_LANG_MAP = {
     'en': 'EN',
     'en-us': 'EN-US',
     'en-gb': 'EN-GB',
-    // Aliases — these selector codes map to a DIFFERENT DeepLX code than the
+    // Aliases — these selector codes map to a DIFFERENT DLX code than the
     // naive uppercased base code would produce.
-    'fil': 'TL',   // Filipino  -> DeepLX's Tagalog (TL), not "FIL"
-    'no': 'NB',    // Norwegian -> DeepLX's Norwegian Bokmål (NB), not "NO"
-    'ku': 'KMR',   // Kurdish   -> DeepLX's Kurmanji (KMR), not "KU"
-    // 3-letter codes supported by DeepLX. The fallback would actually produce
+    'fil': 'TL',   // Filipino  -> DLX's Tagalog (TL), not "FIL"
+    'no': 'NB',    // Norwegian -> DLX's Norwegian Bokmål (NB), not "NO"
+    'ku': 'KMR',   // Kurdish   -> DLX's Kurmanji (KMR), not "KU"
+    // 3-letter codes supported by DLX. The fallback would actually produce
     // these correctly, but listing them here guards against case/quoting issues
-    // and documents which 3-letter selector values are DeepLX-compatible.
+    // and documents which 3-letter selector values are DLX-compatible.
     'bho': 'BHO',
     'ceb': 'CEB',
     'ckb': 'CKB',
@@ -59,22 +59,22 @@ const DEEPL_LANG_MAP = {
     'yi': 'YI',
 };
 
-function deeplLangCode(lang) {
+function dlxLangCode(lang) {
     if (!lang || lang === 'auto') return '';
     const lower = lang.toLowerCase();
-    if (DEEPL_LANG_MAP[lower]) return DEEPL_LANG_MAP[lower];
+    if (DLX_LANG_MAP[lower]) return DLX_LANG_MAP[lower];
     // Base code uppercased (e.g. "id" -> "ID", "fr" -> "FR")
     return lower.split('-')[0].toUpperCase();
 }
 
-async function translateWithDeepL(text, sourceLanguage, destinationLanguage) {
-    const { deeplEndpoint } = await chrome.storage.local.get(['deeplEndpoint']);
-    const endpoint = (deeplEndpoint || '').trim();
-    if (!endpoint) throw new Error('No DeepLX endpoint configured. Set one in the extension settings.');
+async function translateWithDlx(text, sourceLanguage, destinationLanguage) {
+    const { dlxEndpoint } = await chrome.storage.local.get(['dlxEndpoint']);
+    const endpoint = (dlxEndpoint || '').trim();
+    if (!endpoint) throw new Error('No DLX endpoint configured. Set one in the extension settings.');
     const url = endpoint.replace(/\/+$/, '');
 
-    const body = { text, target_lang: deeplLangCode(destinationLanguage) };
-    const src = deeplLangCode(sourceLanguage);
+    const body = { text, target_lang: dlxLangCode(destinationLanguage) };
+    const src = dlxLangCode(sourceLanguage);
     if (src) body.source_lang = src;
 
     const res = await fetch(url, {
@@ -82,14 +82,14 @@ async function translateWithDeepL(text, sourceLanguage, destinationLanguage) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
     });
-    if (!res.ok) throw new Error(`DeepLX HTTP ${res.status} ${res.statusText}`);
+    if (!res.ok) throw new Error(`DLX HTTP ${res.status} ${res.statusText}`);
     const data = await res.json();
-    // DeepLX responses: { code: 200, data: "..." } or { translations: [...] }
+    // DLX responses: { code: 200, data: "..." } or { translations: [...] }
     if (data && typeof data.data === 'string') return data.data;
     if (Array.isArray(data?.translations) && data.translations[0]?.text != null) {
         return data.translations[0].text;
     }
-    throw new Error(`DeepLX unexpected response: ${JSON.stringify(data).slice(0, 200)}`);
+    throw new Error(`DLX unexpected response: ${JSON.stringify(data).slice(0, 200)}`);
 }
 
 const GOOGLE_LANG_MAP = {
@@ -141,25 +141,25 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         return true;
     }
 
-    if (msg.type === 'TRANSLATE_DEEPL') {
+    if (msg.type === 'TRANSLATE_DLX') {
         (async () => {
             try {
-                const result = await translateWithDeepL(msg.text, msg.sourceLanguage, msg.destinationLanguage);
+                const result = await translateWithDlx(msg.text, msg.sourceLanguage, msg.destinationLanguage);
                 if (result) return sendResponse({ result });
-                sendResponse({ error: 'DeepLX returned an empty result' });
+                sendResponse({ error: 'DLX returned an empty result' });
             } catch (e) {
-                console.error('Translatify: DeepLX translation failed', { text: msg.text, error: e.message });
-                sendResponse({ error: `DeepLX translation failed: ${e.message}` });
+                console.error('Translatify: DLX translation failed', { text: msg.text, error: e.message });
+                sendResponse({ error: `DLX translation failed: ${e.message}` });
             }
         })();
         return true;
     }
 
-    if (msg.type === 'TEST_DEEPL') {
+    if (msg.type === 'TEST_DLX') {
         (async () => {
             try {
                 const endpoint = (msg.endpoint || '').trim();
-                if (!endpoint) return sendResponse({ error: 'No DeepLX endpoint configured.' });
+                if (!endpoint) return sendResponse({ error: 'No DLX endpoint configured.' });
                 const url = endpoint.replace(/\/+$/, '');
                 const res = await fetch(url, {
                     method: 'POST',
@@ -171,7 +171,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
                 if (data && typeof data.data === 'string') {
                     return sendResponse({ ok: true });
                 }
-                sendResponse({ error: 'Endpoint did not return a DeepLX-style {data} field' });
+                sendResponse({ error: 'Endpoint did not return a DLX-style {data} field' });
             } catch (e) {
                 sendResponse({ error: e.message });
             }

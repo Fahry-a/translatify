@@ -67,21 +67,21 @@
         "message": "커스텀 AI (OpenAI 호환)",
         "description": "Custom AI provider option"
     },
-    "providerDeepL": {
-        "message": "DeepLX",
-        "description": "DeepLX provider option"
+    "providerDlx": {
+        "message": "DLX",
+        "description": "DLX provider option"
     },
-    "deeplEndpoint": {
-        "message": "DeepLX 엔드포인트 URL",
-        "description": "Label for DeepLX endpoint input"
+    "dlxEndpoint": {
+        "message": "DLX 엔드포인트 URL",
+        "description": "Label for DLX endpoint input"
     },
-    "deeplEndpointHint": {
-        "message": "DeepLX 호환 엔드포인트를 입력하세요 (자체 호스팅 또는 공개 인스턴스 — 옵션은 wiki 참조).",
-        "description": "Hint explaining the DeepLX endpoint field"
+    "dlxEndpointHint": {
+        "message": "DLX 호환 엔드포인트를 입력하세요 (자체 호스팅 또는 공개 인스턴스 — 옵션은 wiki 참조).",
+        "description": "Hint explaining the DLX endpoint field"
     },
-    "deeplTestConnection": {
+    "dlxTestConnection": {
         "message": "연결 테스트",
-        "description": "Button to test DeepLX endpoint connection"
+        "description": "Button to test DLX endpoint connection"
     },
     "aiEndpoint": {
         "message": "API 엔드포인트 URL",

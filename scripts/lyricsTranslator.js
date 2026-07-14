@@ -37,8 +37,8 @@ let aiBatchPending = false;
 let aiFailoverEnabled = true;
 
 // Active translation provider for the current pass. "google" uses TRANSLATE messages
-// (Google endpoints); "deepl" routes the same line-by-line path through TRANSLATE_DEEPL
-// (the DeepLX endpoint — no API key required). "customAI" is handled separately via the batch flow.
+// (Google endpoints); "dlx" routes the same line-by-line path through TRANSLATE_DLX
+// (the DLX endpoint — no API key required). "customAI" is handled separately via the batch flow.
 let activeProvider = 'google';
 
 // Re-entrancy guard for translate(), set before any await.
@@ -104,7 +104,7 @@ async function translateText(text, sourceLanguage, destinationLanguage) {
     const requestPromise = (async () => {
         let response;
         try {
-            const messageType = activeProvider === 'deepl' ? 'TRANSLATE_DEEPL' : 'TRANSLATE';
+            const messageType = activeProvider === 'dlx' ? 'TRANSLATE_DLX' : 'TRANSLATE';
             response = await chrome.runtime.sendMessage({
                 type: messageType,
                 text,
@@ -528,7 +528,7 @@ async function runTranslate() {
         const settings = await chrome.storage.local.get(['translationProvider', 'aiEndpoint']);
         // Make the active provider visible to translateText() so per-line calls
         // (both in the live pass and the MutationObserver) use the right endpoint.
-        activeProvider = settings.translationProvider === 'deepl' ? 'deepl' : 'google';
+        activeProvider = settings.translationProvider === 'dlx' ? 'dlx' : 'google';
         // Show the loading indicator only while lyrics are actually being fetched/rendered.
         setTranslatingIndicator(true);
         let aiErrored = false;

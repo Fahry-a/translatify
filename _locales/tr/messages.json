@@ -67,21 +67,21 @@
         "message": "Özel AI (OpenAI uyumlu)",
         "description": "Custom AI provider option"
     },
-    "providerDeepL": {
-        "message": "DeepLX",
-        "description": "DeepLX provider option"
+    "providerDlx": {
+        "message": "DLX",
+        "description": "DLX provider option"
     },
-    "deeplEndpoint": {
-        "message": "DeepLX Uç Nokta URL'si",
-        "description": "Label for DeepLX endpoint input"
+    "dlxEndpoint": {
+        "message": "DLX Uç Nokta URL'si",
+        "description": "Label for DLX endpoint input"
     },
-    "deeplEndpointHint": {
-        "message": "DeepLX uyumlu bir uç nokta girin (kendi kendine barındırılan veya genel bir örnek — seçenekler için wiki'ye bakın).",
-        "description": "Hint explaining the DeepLX endpoint field"
+    "dlxEndpointHint": {
+        "message": "DLX uyumlu bir uç nokta girin (kendi kendine barındırılan veya genel bir örnek — seçenekler için wiki'ye bakın).",
+        "description": "Hint explaining the DLX endpoint field"
     },
-    "deeplTestConnection": {
+    "dlxTestConnection": {
         "message": "Bağlantıyı Test Et",
-        "description": "Button to test DeepLX endpoint connection"
+        "description": "Button to test DLX endpoint connection"
     },
     "aiEndpoint": {
         "message": "API Uç Nokta URL'si",

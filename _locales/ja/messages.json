@@ -67,21 +67,21 @@
         "message": "カスタム AI（OpenAI 互換）",
         "description": "Custom AI provider option"
     },
-    "providerDeepL": {
-        "message": "DeepLX",
-        "description": "DeepLX provider option"
+    "providerDlx": {
+        "message": "DLX",
+        "description": "DLX provider option"
     },
-    "deeplEndpoint": {
-        "message": "DeepLX エンドポイント URL",
-        "description": "Label for DeepLX endpoint input"
+    "dlxEndpoint": {
+        "message": "DLX エンドポイント URL",
+        "description": "Label for DLX endpoint input"
     },
-    "deeplEndpointHint": {
-        "message": "DeepLX 互換のエンドポイントを入力してください（自己ホストまたは公開インスタンス — オプションは wiki を参照）。",
-        "description": "Hint explaining the DeepLX endpoint field"
+    "dlxEndpointHint": {
+        "message": "DLX 互換のエンドポイントを入力してください（自己ホストまたは公開インスタンス — オプションは wiki を参照）。",
+        "description": "Hint explaining the DLX endpoint field"
     },
-    "deeplTestConnection": {
+    "dlxTestConnection": {
         "message": "接続テスト",
-        "description": "Button to test DeepLX endpoint connection"
+        "description": "Button to test DLX endpoint connection"
     },
     "aiEndpoint": {
         "message": "API エンドポイント URL",

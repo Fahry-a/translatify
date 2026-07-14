@@ -67,21 +67,21 @@
         "message": "IA personalizada (compatível com OpenAI)",
         "description": "Custom AI provider option"
     },
-    "providerDeepL": {
-        "message": "DeepLX",
-        "description": "DeepLX provider option"
+    "providerDlx": {
+        "message": "DLX",
+        "description": "DLX provider option"
     },
-    "deeplEndpoint": {
-        "message": "URL do endpoint do DeepLX",
-        "description": "Label for DeepLX endpoint input"
+    "dlxEndpoint": {
+        "message": "URL do endpoint do DLX",
+        "description": "Label for DLX endpoint input"
     },
-    "deeplEndpointHint": {
-        "message": "Introduza um endpoint compatível com DeepLX (auto-hospedado ou uma instância pública — consulte a wiki para opções).",
-        "description": "Hint explaining the DeepLX endpoint field"
+    "dlxEndpointHint": {
+        "message": "Introduza um endpoint compatível com DLX (auto-hospedado ou uma instância pública — consulte a wiki para opções).",
+        "description": "Hint explaining the DLX endpoint field"
     },
-    "deeplTestConnection": {
+    "dlxTestConnection": {
         "message": "Testar ligação",
-        "description": "Button to test DeepLX endpoint connection"
+        "description": "Button to test DLX endpoint connection"
     },
     "aiEndpoint": {
         "message": "URL do endpoint da API",

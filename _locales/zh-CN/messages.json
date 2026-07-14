@@ -67,21 +67,21 @@
         "message": "自定义 AI（兼容 OpenAI）",
         "description": "Custom AI provider option"
     },
-    "providerDeepL": {
-        "message": "DeepLX",
-        "description": "DeepLX provider option"
+    "providerDlx": {
+        "message": "DLX",
+        "description": "DLX provider option"
     },
-    "deeplEndpoint": {
-        "message": "DeepLX 端点地址",
-        "description": "Label for DeepLX endpoint input"
+    "dlxEndpoint": {
+        "message": "DLX 端点地址",
+        "description": "Label for DLX endpoint input"
     },
-    "deeplEndpointHint": {
-        "message": "请输入兼容 DeepLX 的端点（可自建，或使用公共实例——详见 wiki）。",
-        "description": "Hint explaining the DeepLX endpoint field"
+    "dlxEndpointHint": {
+        "message": "请输入兼容 DLX 的端点（可自建，或使用公共实例——详见 wiki）。",
+        "description": "Hint explaining the DLX endpoint field"
     },
-    "deeplTestConnection": {
+    "dlxTestConnection": {
         "message": "测试连接",
-        "description": "Button to test DeepLX endpoint connection"
+        "description": "Button to test DLX endpoint connection"
     },
     "aiEndpoint": {
         "message": "API 端点地址",

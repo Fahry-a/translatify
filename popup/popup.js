@@ -18,10 +18,10 @@ const aiTestConnection = document.getElementById('aiTestConnection');
 const aiTestStatus = document.getElementById('aiTestStatus');
 const aiThinkMode = document.getElementById('aiThinkMode');
 const aiFailover = document.getElementById('aiFailover');
-const deeplSettings = document.getElementById('deeplSettings');
-const deeplEndpoint = document.getElementById('deeplEndpoint');
-const deeplTestConnection = document.getElementById('deeplTestConnection');
-const deeplTestStatus = document.getElementById('deeplTestStatus');
+const dlxSettings = document.getElementById('dlxSettings');
+const dlxEndpoint = document.getElementById('dlxEndpoint');
+const dlxTestConnection = document.getElementById('dlxTestConnection');
+const dlxTestStatus = document.getElementById('dlxTestStatus');
 const clearSongCache = document.getElementById('clearSongCache');
 const clearAllCache = document.getElementById('clearAllCache');
 const clearStorage = document.getElementById('clearStorage');
@@ -99,7 +99,7 @@ chrome.storage.local.get(['translateButton'], (result) => {
 });
 
 // Load translation provider settings
-chrome.storage.local.get(['translationProvider', 'aiEndpoint', 'aiApiKey', 'aiModel', 'aiThinkMode', 'aiFailover', 'deeplEndpoint'], (result) => {
+chrome.storage.local.get(['translationProvider', 'aiEndpoint', 'aiApiKey', 'aiModel', 'aiThinkMode', 'aiFailover', 'dlxEndpoint'], (result) => {
     if (result.translationProvider) {
         translationProvider.value = result.translationProvider;
     }
@@ -117,8 +117,8 @@ chrome.storage.local.get(['translationProvider', 'aiEndpoint', 'aiApiKey', 'aiMo
     }
     // Failover (instant Google translation while AI loads) is on by default.
     aiFailover.checked = result.aiFailover !== undefined ? result.aiFailover : true;
-    if (result.deeplEndpoint) {
-        deeplEndpoint.value = result.deeplEndpoint;
+    if (result.dlxEndpoint) {
+        dlxEndpoint.value = result.dlxEndpoint;
     }
     updateProviderSettingsVisibility();
 });
@@ -127,7 +127,7 @@ chrome.storage.local.get(['translationProvider', 'aiEndpoint', 'aiApiKey', 'aiMo
 function updateProviderSettingsVisibility() {
     const provider = translationProvider.value;
     aiSettings.style.display = provider === 'customAI' ? 'block' : 'none';
-    deeplSettings.style.display = provider === 'deepl' ? 'block' : 'none';
+    dlxSettings.style.display = provider === 'dlx' ? 'block' : 'none';
 }
 
 function sendToSpotifyTabs(message) {
@@ -164,39 +164,39 @@ translationProvider.addEventListener('change', async () => {
     sendToSpotifyTabs({ updateTranslationProvider: provider });
 });
 
-async function saveAndPropagateDeeplSettings() {
-    const endpoint = deeplEndpoint.value.trim();
+async function saveAndPropagateDlxSettings() {
+    const endpoint = dlxEndpoint.value.trim();
     if (endpoint) await ensureHostPermission(endpoint);
-    await chrome.storage.local.set({deeplEndpoint: endpoint});
-    sendToSpotifyTabs({ updateDeeplSettings: { endpoint } });
+    await chrome.storage.local.set({dlxEndpoint: endpoint});
+    sendToSpotifyTabs({ updateDlxSettings: { endpoint } });
 }
 
-deeplEndpoint.addEventListener('change', saveAndPropagateDeeplSettings);
+dlxEndpoint.addEventListener('change', saveAndPropagateDlxSettings);
 
-deeplTestConnection.addEventListener('click', async () => {
-    const endpoint = deeplEndpoint.value.trim();
+dlxTestConnection.addEventListener('click', async () => {
+    const endpoint = dlxEndpoint.value.trim();
     if (endpoint) {
         const granted = await ensureHostPermission(endpoint);
         if (!granted) {
-            deeplTestStatus.textContent = (chrome.i18n.getMessage('aiTestFail') || 'Connection failed.') + ' (access to the endpoint was not granted)';
-            deeplTestStatus.className = 'error';
+            dlxTestStatus.textContent = (chrome.i18n.getMessage('aiTestFail') || 'Connection failed.') + ' (access to the endpoint was not granted)';
+            dlxTestStatus.className = 'error';
             return;
         }
     }
-    deeplTestStatus.textContent = chrome.i18n.getMessage('aiTestInProgress') || 'Testing...';
-    deeplTestStatus.className = 'loading';
+    dlxTestStatus.textContent = chrome.i18n.getMessage('aiTestInProgress') || 'Testing...';
+    dlxTestStatus.className = 'loading';
     try {
-        const response = await chrome.runtime.sendMessage({ type: 'TEST_DEEPL', endpoint });
+        const response = await chrome.runtime.sendMessage({ type: 'TEST_DLX', endpoint });
         if (response?.ok) {
-            deeplTestStatus.textContent = chrome.i18n.getMessage('aiTestSuccess') || 'Connection successful!';
-            deeplTestStatus.className = 'success';
+            dlxTestStatus.textContent = chrome.i18n.getMessage('aiTestSuccess') || 'Connection successful!';
+            dlxTestStatus.className = 'success';
         } else {
-            deeplTestStatus.textContent = (chrome.i18n.getMessage('aiTestFail') || 'Connection failed.') + ` (${response?.error || 'unknown error'})`;
-            deeplTestStatus.className = 'error';
+            dlxTestStatus.textContent = (chrome.i18n.getMessage('aiTestFail') || 'Connection failed.') + ` (${response?.error || 'unknown error'})`;
+            dlxTestStatus.className = 'error';
         }
     } catch (e) {
-        deeplTestStatus.textContent = (chrome.i18n.getMessage('aiTestFail') || 'Connection failed.') + ` (${e.message})`;
-        deeplTestStatus.className = 'error';
+        dlxTestStatus.textContent = (chrome.i18n.getMessage('aiTestFail') || 'Connection failed.') + ` (${e.message})`;
+        dlxTestStatus.className = 'error';
     }
 });
 
