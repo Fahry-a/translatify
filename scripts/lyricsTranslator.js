@@ -36,6 +36,11 @@ let aiBatchPending = false;
 // the MutationObserver does not Google-translate lines that appear during the wait.
 let aiFailoverEnabled = true;
 
+// Active translation provider for the current pass. "google" uses TRANSLATE messages
+// (Google endpoints); "dlx" routes the same line-by-line path through TRANSLATE_DLX
+// (the DLX endpoint — no API key required). "customAI" is handled separately via the batch flow.
+let activeProvider = 'google';
+
 // Re-entrancy guard for translate(), set before any await.
 let translateInFlight = false;
 
@@ -99,8 +104,9 @@ async function translateText(text, sourceLanguage, destinationLanguage) {
     const requestPromise = (async () => {
         let response;
         try {
+            const messageType = activeProvider === 'dlx' ? 'TRANSLATE_DLX' : 'TRANSLATE';
             response = await chrome.runtime.sendMessage({
-                type: 'TRANSLATE',
+                type: messageType,
                 text,
                 sourceLanguage,
                 destinationLanguage
@@ -520,11 +526,17 @@ async function runTranslate() {
         // Gate on provider + endpoint; the background reads the rest and falls
         // back to Google if it isn't configured.
         const settings = await chrome.storage.local.get(['translationProvider', 'aiEndpoint']);
+        // Make the active provider visible to translateText() so per-line calls
+        // (both in the live pass and the MutationObserver) use the right endpoint.
+        activeProvider = settings.translationProvider === 'dlx' ? 'dlx' : 'google';
         // Show the loading indicator only while lyrics are actually being fetched/rendered.
         setTranslatingIndicator(true);
         let aiErrored = false;
         try {
             if (settings.translationProvider === 'customAI' && settings.aiEndpoint) {
+                // AI batch uses its own provider-aware flow; restore line-by-line
+                // defaults for the failover pre-pass so Google still works there.
+                activeProvider = 'google';
                 aiErrored = (await translateBatchWithAIAndRender(sourceLanguage, destinationLanguage)) === false;
             } else {
                 await translateLineByLineWithGoogle(sourceLanguage, destinationLanguage);

@@ -18,6 +18,10 @@ const aiTestConnection = document.getElementById('aiTestConnection');
 const aiTestStatus = document.getElementById('aiTestStatus');
 const aiThinkMode = document.getElementById('aiThinkMode');
 const aiFailover = document.getElementById('aiFailover');
+const dlxSettings = document.getElementById('dlxSettings');
+const dlxEndpoint = document.getElementById('dlxEndpoint');
+const dlxTestConnection = document.getElementById('dlxTestConnection');
+const dlxTestStatus = document.getElementById('dlxTestStatus');
 const clearSongCache = document.getElementById('clearSongCache');
 const clearAllCache = document.getElementById('clearAllCache');
 const clearStorage = document.getElementById('clearStorage');
@@ -94,8 +98,8 @@ chrome.storage.local.get(['translateButton'], (result) => {
     }
 });
 
-// Load AI provider settings
-chrome.storage.local.get(['translationProvider', 'aiEndpoint', 'aiApiKey', 'aiModel', 'aiThinkMode', 'aiFailover'], (result) => {
+// Load translation provider settings
+chrome.storage.local.get(['translationProvider', 'aiEndpoint', 'aiApiKey', 'aiModel', 'aiThinkMode', 'aiFailover', 'dlxEndpoint'], (result) => {
     if (result.translationProvider) {
         translationProvider.value = result.translationProvider;
     }
@@ -113,8 +117,18 @@ chrome.storage.local.get(['translationProvider', 'aiEndpoint', 'aiApiKey', 'aiMo
     }
     // Failover (instant Google translation while AI loads) is on by default.
     aiFailover.checked = result.aiFailover !== undefined ? result.aiFailover : true;
-    aiSettings.style.display = translationProvider.value === 'customAI' ? 'block' : 'none';
+    if (result.dlxEndpoint) {
+        dlxEndpoint.value = result.dlxEndpoint;
+    }
+    updateProviderSettingsVisibility();
 });
+
+// Show the settings panel for the selected provider, hide the others.
+function updateProviderSettingsVisibility() {
+    const provider = translationProvider.value;
+    aiSettings.style.display = provider === 'customAI' ? 'block' : 'none';
+    dlxSettings.style.display = provider === 'dlx' ? 'block' : 'none';
+}
 
 function sendToSpotifyTabs(message) {
     chrome.tabs.query({ url: "https://open.spotify.com/*" }, tabs => {
@@ -145,9 +159,45 @@ applyLanguageButton.addEventListener('click', async () => {
 
 translationProvider.addEventListener('change', async () => {
     const provider = translationProvider.value;
-    aiSettings.style.display = provider === 'customAI' ? 'block' : 'none';
+    updateProviderSettingsVisibility();
     await chrome.storage.local.set({translationProvider: provider});
     sendToSpotifyTabs({ updateTranslationProvider: provider });
+});
+
+async function saveAndPropagateDlxSettings() {
+    const endpoint = dlxEndpoint.value.trim();
+    if (endpoint) await ensureHostPermission(endpoint);
+    await chrome.storage.local.set({dlxEndpoint: endpoint});
+    sendToSpotifyTabs({ updateDlxSettings: { endpoint } });
+}
+
+dlxEndpoint.addEventListener('change', saveAndPropagateDlxSettings);
+
+dlxTestConnection.addEventListener('click', async () => {
+    const endpoint = dlxEndpoint.value.trim();
+    if (endpoint) {
+        const granted = await ensureHostPermission(endpoint);
+        if (!granted) {
+            dlxTestStatus.textContent = (chrome.i18n.getMessage('aiTestFail') || 'Connection failed.') + ' (access to the endpoint was not granted)';
+            dlxTestStatus.className = 'error';
+            return;
+        }
+    }
+    dlxTestStatus.textContent = chrome.i18n.getMessage('aiTestInProgress') || 'Testing...';
+    dlxTestStatus.className = 'loading';
+    try {
+        const response = await chrome.runtime.sendMessage({ type: 'TEST_DLX', endpoint });
+        if (response?.ok) {
+            dlxTestStatus.textContent = chrome.i18n.getMessage('aiTestSuccess') || 'Connection successful!';
+            dlxTestStatus.className = 'success';
+        } else {
+            dlxTestStatus.textContent = (chrome.i18n.getMessage('aiTestFail') || 'Connection failed.') + ` (${response?.error || 'unknown error'})`;
+            dlxTestStatus.className = 'error';
+        }
+    } catch (e) {
+        dlxTestStatus.textContent = (chrome.i18n.getMessage('aiTestFail') || 'Connection failed.') + ` (${e.message})`;
+        dlxTestStatus.className = 'error';
+    }
 });
 
 function endpointOrigin(endpoint) {

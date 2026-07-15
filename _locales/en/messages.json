@@ -68,6 +68,22 @@
         "message": "Custom AI (OpenAI-compatible)",
         "description": "Custom AI provider option"
     },
+    "providerDlx": {
+        "message": "DLX",
+        "description": "DLX provider option"
+    },
+    "dlxEndpoint": {
+        "message": "DLX Endpoint URL",
+        "description": "Label for DLX endpoint input"
+    },
+    "dlxEndpointHint": {
+        "message": "Enter a DLX-compatible endpoint (self-hosted or a public instance — see the wiki for options).",
+        "description": "Hint explaining the DLX endpoint field"
+    },
+    "dlxTestConnection": {
+        "message": "Test Connection",
+        "description": "Button to test DLX endpoint connection"
+    },
     "aiEndpoint": {
         "message": "API Endpoint URL",
         "description": "Label for AI API endpoint input"
