@@ -108,6 +108,11 @@ function ensureTranslateButton() {
 // there is nothing to self-heal: missing button, rebuilt control bar, and song
 // changes all surface as childList mutations on the same descendant subtree.
 let listeningObserver = null;
+// Delegated click listener + the anchor it's bound to. Kept as module refs so
+// disconnectTranslateButtonObservers() can remove the handler on teardown —
+// without these, re-calling setupListening() would stack duplicate listeners.
+let listeningAnchor = null;
+let listeningClickHandler = null;
 
 // Cheap dedupe of song-change handling: only re-translate when the now-playing
 // track actually changed, not on every mutation batch (e.g. progress updates).
@@ -122,11 +127,14 @@ function setupListening() {
     // Anchor that survives every Spotify re-render. The translate button and
     // the now-playing widget live somewhere under here, but #main-view itself
     // stays mounted, so this observer never needs to be re-attached.
-    const anchor = document.querySelector("#main-view") || document.querySelector("#main") || document.body;
-    if (!anchor || anchor === document.body) {
+    const anchor = document.querySelector("#main-view") || document.querySelector("#main");
+    if (!anchor) {
         // #main-view/#main not present yet — defer via a one-shot poll until the
         // app shell mounts, then install the real observer. Kept simple on
-        // purpose: succeeds quickly on the real Spotify web app.
+        // purpose: succeeds quickly on the real Spotify web app. (We deliberately
+        // do NOT fall back to document.body: body was never a useful observer
+        // target here — the branch below only ever retried — and falling back to
+        // it would risk polling forever if the shell never mounts.)
         return setTimeout(setupListening, 300);
     }
 
@@ -138,18 +146,40 @@ function setupListening() {
     // (The translate button's own click → toggleTranslateButton is still bound
     // directly in addTranslateButton(); both paths call translate(), deduped by
     // translateInFlight.)
-    anchor.addEventListener('click', () => {
-        enableTranslateButton();
-        translate();
-    });
+    // Event delegation: bound once on the stable anchor. The previous design
+    // bound translate/enableTranslateButton directly to each control-bar button
+    // via querySelectorAll('button'), which lost every listener on control-bar
+    // re-renders and forced setupListening() to re-run. A delegated listener on
+    // the anchor survives every re-render because the anchor survives.
+    // We only react to clicks that land on a button (closest("button")) so that
+    // clicking track rows, the scrollbar, volume sliders, etc. doesn't fire
+    // enableTranslateButton()/translate() on every interaction across the whole
+    // app. (The translate button's own click → toggleTranslateButton is still
+    // bound directly in addTranslateButton(); both paths call translate(),
+    // deduped by translateInFlight.) The handler and anchor are stored as module
+    // refs so disconnectTranslateButtonObservers() can remove this listener.
+    listeningClickHandler = (event) => {
+        if (event.target.closest("button")) {
+            enableTranslateButton();
+            translate();
+        }
+    };
+    listeningAnchor = anchor;
+    listeningAnchor.addEventListener('click', listeningClickHandler);
 
     // The previous song-change detection watched the now-playing widget's text,
     // which fires on every progress tick. getSongInfo() reads the track title
     // link instead, so the key only changes when the song actually changes.
     const songChanged = () => {
         const { songTitle, artistName } = getSongInfo();
+        // Require a valid track title before doing anything: getSongInfo() can
+        // momentarily return empty strings during a track transition or before
+        // metadata loads. Without this guard the key collapses to "|", which is
+        // a truthy string and would slip past a naive !key check, triggering a
+        // redundant translate on every gap.
+        if (!songTitle) return false;
         const key = `${songTitle}|${artistName}`;
-        if (!key || key === lastNowPlayingKey) return false;
+        if (key === lastNowPlayingKey) return false;
         lastNowPlayingKey = key;
         return true;
     };
@@ -180,6 +210,14 @@ function disconnectTranslateButtonObservers() {
     if (listeningObserver) {
         try { listeningObserver.disconnect(); } catch {}
         listeningObserver = null;
+    }
+    // Remove the delegated click listener too — otherwise a later
+    // setupListening() would bind a second handler on the same anchor and stack
+    // duplicate listeners (memory leak + double-fire translate/enable).
+    if (listeningAnchor && listeningClickHandler) {
+        try { listeningAnchor.removeEventListener("click", listeningClickHandler); } catch {}
+        listeningAnchor = null;
+        listeningClickHandler = null;
     }
 }
 
