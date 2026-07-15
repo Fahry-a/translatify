@@ -59,40 +59,166 @@ function loadChecker() {
     }
 }
 
-// Sets up all the event listeners
-function setupListening() {
-    const buttonList = document.querySelectorAll("button");
-    const translateButton = document.querySelector("button[data-testid='translate-button']");
+// Re-entrancy guard for ensureTranslateButton(): several MutationObserver
+// batches can arrive before the first re-inject lands, so collapse them into a
+// single injection. (Note: unlike the old design this no longer rebuilds the
+// observer from inside the callback, so there is no observer-recreate cycle to
+// guard against — this just prevents a double inject race.)
+let ensureInFlight = false;
+
+// Re-injects the translate button if Spotify re-rendered the control bar
+// (e.g. an ad-skip tears the bar down and rebuilds it). Idempotent: it does
+// nothing when the button is already present, so it's safe to call from the
+// observer on every mutation batch. This replaces the previous per-node
+// "self-heal" observers — see setupListening() for why rooting one observer on
+// a stable anchor removes any need to re-attach.
+function ensureTranslateButton() {
+    if (!isExtensionAlive()) return;
+    if (ensureInFlight) return;
+    const existingButton = document.querySelector("button[data-testid='translate-button']");
+    if (existingButton) return; // still present, nothing to do
+
+    const repeatButton = document.querySelector("button[data-testid='control-button-repeat']");
     const lyricsButton = document.querySelector("button[data-testid='lyrics-button']");
-    const nowPlaying = document.querySelector("div[data-testid='now-playing-widget']");
+    if (!repeatButton || !lyricsButton) return; // bar not ready yet
 
-    buttonList.forEach((button) => {
-        button.addEventListener("click", translate);
-        button.addEventListener("click", enableTranslateButton);
-    });
-    
-    translateButton.removeEventListener("change",translate);
-    translateButton.removeEventListener("click",translate);
-    
-    // Listen for changes in the now playing widget
-    var nowPlayingObserver = new MutationObserver(function(mutationsList, nowPlayingObserver) {
-        setTimeout(translate, 100);
-        console.log('Translatify: Next music');
-    });
-    nowPlayingObserver.observe(nowPlaying, { attributes: true});
+    console.log("Translatify: Translate button missing, re-injecting (control bar re-rendered)");
+    ensureInFlight = true;
+    try {
+        eraseButton(); // safety: clear any stale leftover loader
+        addTranslateButton();
+        enableTranslateButton();
+        updateTranslateButtonAIState();
 
-    // Listen for changes in the button bar
-    const rightButtonBar = lyricsButton.parentNode;
-    // Only works on the button bar
-    var rightButtonBarObserver = new MutationObserver(function(mutationsList, rightButtonBarObserver) {
-        console.log('Translatify: Button bar changed');
+        // Re-apply the enabled state from the previous session so the user isn't
+        // forced to click the button again after a silent re-inject.
+        chrome.storage.local.get(["translateButton"]).then((result) => {
+            if (result.translateButton) {
+                toggleTranslateButton();
+            }
+        }).catch(() => {});
+    } finally {
+        ensureInFlight = false;
+    }
+}
+
+// The single, stable observer. Rooted on #main-view (fallback #main / body),
+// which is never torn down by Spotify — only its descendants are. Observing a
+// node that outlives every re-render means the observer never goes stale, so
+// there is nothing to self-heal: missing button, rebuilt control bar, and song
+// changes all surface as childList mutations on the same descendant subtree.
+let listeningObserver = null;
+// Delegated click listener + the anchor it's bound to. Kept as module refs so
+// disconnectTranslateButtonObservers() can remove the handler on teardown —
+// without these, re-calling setupListening() would stack duplicate listeners.
+let listeningAnchor = null;
+let listeningClickHandler = null;
+
+// Cheap dedupe of song-change handling: only re-translate when the now-playing
+// track actually changed, not on every mutation batch (e.g. progress updates).
+let lastNowPlayingKey = '';
+
+// Is idempotent if called repeatedly — see setupListening(). Hold one reference
+// so we can disconnect before re-observing (only relevant if the anchor itself
+// ever changes, e.g. the extension lands on a page without #main-view).
+function setupListening() {
+    if (listeningObserver) return; // already observing — nothing to do
+
+    // Anchor that survives every Spotify re-render. The translate button and
+    // the now-playing widget live somewhere under here, but #main-view itself
+    // stays mounted, so this observer never needs to be re-attached.
+    const anchor = document.querySelector("#main-view") || document.querySelector("#main");
+    if (!anchor) {
+        // #main-view/#main not present yet — defer via a one-shot poll until the
+        // app shell mounts, then install the real observer. Kept simple on
+        // purpose: succeeds quickly on the real Spotify web app. (We deliberately
+        // do NOT fall back to document.body: body was never a useful observer
+        // target here — the branch below only ever retried — and falling back to
+        // it would risk polling forever if the shell never mounts.)
+        return setTimeout(setupListening, 300);
+    }
+
+    // Event delegation: bound once on the stable anchor. The previous design
+    // bound translate/enableTranslateButton directly to each control-bar button
+    // via querySelectorAll('button'), which lost every listener on control-bar
+    // re-renders and forced setupListening() to re-run. A delegated listener on
+    // the anchor survives every re-render because the anchor survives.
+    // (The translate button's own click → toggleTranslateButton is still bound
+    // directly in addTranslateButton(); both paths call translate(), deduped by
+    // translateInFlight.)
+    // Event delegation: bound once on the stable anchor. The previous design
+    // bound translate/enableTranslateButton directly to each control-bar button
+    // via querySelectorAll('button'), which lost every listener on control-bar
+    // re-renders and forced setupListening() to re-run. A delegated listener on
+    // the anchor survives every re-render because the anchor survives.
+    // We only react to clicks that land on a button (closest("button")) so that
+    // clicking track rows, the scrollbar, volume sliders, etc. doesn't fire
+    // enableTranslateButton()/translate() on every interaction across the whole
+    // app. (The translate button's own click → toggleTranslateButton is still
+    // bound directly in addTranslateButton(); both paths call translate(),
+    // deduped by translateInFlight.) The handler and anchor are stored as module
+    // refs so disconnectTranslateButtonObservers() can remove this listener.
+    listeningClickHandler = (event) => {
+        if (event.target.closest("button")) {
+            enableTranslateButton();
+            translate();
+        }
+    };
+    listeningAnchor = anchor;
+    listeningAnchor.addEventListener('click', listeningClickHandler);
+
+    // The previous song-change detection watched the now-playing widget's text,
+    // which fires on every progress tick. getSongInfo() reads the track title
+    // link instead, so the key only changes when the song actually changes.
+    const songChanged = () => {
+        const { songTitle, artistName } = getSongInfo();
+        // Require a valid track title before doing anything: getSongInfo() can
+        // momentarily return empty strings during a track transition or before
+        // metadata loads. Without this guard the key collapses to "|", which is
+        // a truthy string and would slip past a naive !key check, triggering a
+        // redundant translate on every gap.
+        if (!songTitle) return false;
+        const key = `${songTitle}|${artistName}`;
+        if (key === lastNowPlayingKey) return false;
+        lastNowPlayingKey = key;
+        return true;
+    };
+
+    // One observer over the whole subtree, childList only. childList covers:
+    //   - translate button removed/re-added by a control-bar re-render
+    //   - now-playing track title link swapped on song change
+    // We deliberately do NOT watch attributes: the now-playing widget and the
+    // lyrics highlight toggle classes every few hundred ms, which would flood
+    // this callback. childList-only keeps it cheap and targeted.
+    const observer = new MutationObserver(() => {
+        ensureTranslateButton();            // re-inject only if missing (idempotent)
+        if (songChanged()) {
+            setTimeout(translate, 100);     // new song → re-translate lyrics
+        }
         setTimeout(enableTranslateButton, 0);
-        translate();
-        
     });
-    rightButtonBarObserver.observe(rightButtonBar, { subtree: true, childList: true});
+    observer.observe(anchor, { subtree: true, childList: true });
+    listeningObserver = observer;
+    console.log('Translatify: listening on stable anchor', anchor);
+}
 
-
+// Stop observing — used by external callers that previously relied on
+// disconnectTranslateButtonObservers() during cleanup flows. With a single
+// long-lived observer this is rarely needed, but we keep it so call sites that
+// already existed don't break.
+function disconnectTranslateButtonObservers() {
+    if (listeningObserver) {
+        try { listeningObserver.disconnect(); } catch {}
+        listeningObserver = null;
+    }
+    // Remove the delegated click listener too — otherwise a later
+    // setupListening() would bind a second handler on the same anchor and stack
+    // duplicate listeners (memory leak + double-fire translate/enable).
+    if (listeningAnchor && listeningClickHandler) {
+        try { listeningAnchor.removeEventListener("click", listeningClickHandler); } catch {}
+        listeningAnchor = null;
+        listeningClickHandler = null;
+    }
 }
 
 // Translates the lyrics
