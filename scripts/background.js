@@ -67,6 +67,18 @@ function dlxLangCode(lang) {
     return lower.split('-')[0].toUpperCase();
 }
 
+// Extract the translated string from a DLX response. Two shapes exist in the
+// wild: { code: 200, data: "..." } and { translations: [{ text: "..." }] }.
+// Returns null when neither is present. Shared by translateWithDlx and
+// TEST_DLX so an endpoint that translates also passes "Test Connection".
+function parseDlxResponse(data) {
+    if (data && typeof data.data === 'string') return data.data;
+    if (Array.isArray(data?.translations) && data.translations[0]?.text != null) {
+        return data.translations[0].text;
+    }
+    return null;
+}
+
 async function translateWithDlx(text, sourceLanguage, destinationLanguage) {
     const { dlxEndpoint } = await chrome.storage.local.get(['dlxEndpoint']);
     const endpoint = (dlxEndpoint || '').trim();
@@ -84,11 +96,8 @@ async function translateWithDlx(text, sourceLanguage, destinationLanguage) {
     });
     if (!res.ok) throw new Error(`DLX HTTP ${res.status} ${res.statusText}`);
     const data = await res.json();
-    // DLX responses: { code: 200, data: "..." } or { translations: [...] }
-    if (data && typeof data.data === 'string') return data.data;
-    if (Array.isArray(data?.translations) && data.translations[0]?.text != null) {
-        return data.translations[0].text;
-    }
+    const result = parseDlxResponse(data);
+    if (result != null) return result;
     throw new Error(`DLX unexpected response: ${JSON.stringify(data).slice(0, 200)}`);
 }
 
@@ -168,10 +177,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
                 });
                 if (!res.ok) return sendResponse({ error: `HTTP ${res.status} ${res.statusText}` });
                 const data = await res.json().catch(() => null);
-                if (data && typeof data.data === 'string') {
+                if (parseDlxResponse(data) != null) {
                     return sendResponse({ ok: true });
                 }
-                sendResponse({ error: 'Endpoint did not return a DLX-style {data} field' });
+                sendResponse({ error: 'Endpoint did not return a DLX-style response ({data} or {translations})' });
             } catch (e) {
                 sendResponse({ error: e.message });
             }
