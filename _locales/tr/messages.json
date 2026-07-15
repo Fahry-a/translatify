@@ -1,58 +1,178 @@
 {
     "extName": {
         "message": "Translatify - Spotify Şarkı Sözlerini Çevir",
-        "description": "Uzantı adı"
+        "description": "Extension name"
     },
     "extDesc": {
         "message": "Spotify şarkı sözlerini anında kendi dilinize gerçek zamanlı çevirin.",
-        "description": "Uzantı açıklaması"
+        "description": "Extension description"
     },
     "targetLanguage": {
         "message": "Hedef dil",
-        "description": "Hedef dil"
+        "description": "Target language"
     },
     "applyLanguage": {
         "message": "Dil seçimini uygula",
-        "description": "Dil seçimini uygula"
+        "description": "Apply language selection"
     },
     "lyricsMode": {
         "message": "Şarkı sözü modu",
-        "description": "Şarkı sözü modu"
+        "description": "Lyrics mode"
     },
     "along": {
         "message": "Çeviriyle birlikte orijinal sözleri göster",
-        "description": "Çeviriyle birlikte orijinal sözleri göster"
+        "description": "Show translated lyrics along original"
     },
     "replace": {
         "message": "Şarkı sözlerini çeviriyle değiştir",
-        "description": "Şarkı sözlerini çeviriyle değiştir"
+        "description": "Replace lyrics with translation"
     },
     "lyricsSize": {
         "message": "Çevirilen sözlerin yazı tipi boyutu",
-        "description": "Çevirilen sözlerin yazı tipi boyutu"
+        "description": "Font size of translated lyrics"
     },
     "toggleTip": {
-        "message": "- 🎵 Çeviri düğmesini oynatıcı kontrol çubuğunda aç!",
-        "description": "Çeviri ipucu"
+        "message": "- 🎵 Çeviri düğmesini oynatıcı kontrol çubuğunda aç! ",
+        "description": "toggle tip"
     },
     "githubRepo": {
         "message": "GitHub açık kaynak deposunu incele!",
-        "description": "GitHub deposu"
+        "description": "github repo"
     },
     "reviewLink": {
         "message": "★ Bir inceleme bırak!",
-        "description": "İnceleme bağlantısı"
+        "description": "Chrome Web Store review link"
     },
     "translateToggle": {
         "message": "Çeviriyi Etkinleştir",
-        "description": "Çeviri etkinleştirme/durdurma düğmesi"
+        "description": "Toggle for enabling/disabling translation"
     },
     "translationOn": {
         "message": "Açık",
-        "description": "Çeviri açık durumu"
+        "description": "Translation toggle - on state"
     },
     "translationOff": {
         "message": "Kapalı",
-        "description": "Çeviri kapalı durumu"
+        "description": "Translation toggle - off state"
+    },
+    "translationProvider": {
+        "message": "Çeviri Sağlayıcısı",
+        "description": "Label for translation provider selector"
+    },
+    "providerGoogle": {
+        "message": "Google Çeviri",
+        "description": "Google Translate provider option"
+    },
+    "providerCustomAI": {
+        "message": "Özel AI (OpenAI uyumlu)",
+        "description": "Custom AI provider option"
+    },
+    "providerDlx": {
+        "message": "DLX",
+        "description": "DLX provider option"
+    },
+    "dlxEndpoint": {
+        "message": "DLX Uç Nokta URL'si",
+        "description": "Label for DLX endpoint input"
+    },
+    "dlxEndpointHint": {
+        "message": "DLX uyumlu bir uç nokta girin (kendi kendine barındırılan veya genel bir örnek — seçenekler için wiki'ye bakın).",
+        "description": "Hint explaining the DLX endpoint field"
+    },
+    "dlxTestConnection": {
+        "message": "Bağlantıyı Test Et",
+        "description": "Button to test DLX endpoint connection"
+    },
+    "aiEndpoint": {
+        "message": "API Uç Nokta URL'si",
+        "description": "Label for AI API endpoint input"
+    },
+    "aiEndpointPlaceholder": {
+        "message": "https://api.openai.com/v1",
+        "description": "Placeholder for AI endpoint input"
+    },
+    "aiEndpointHint": {
+        "message": "/chat/completions bu URL'nin sonuna eklenecektir",
+        "description": "Hint explaining that /chat/completions is appended to the endpoint URL"
+    },
+    "aiApiKey": {
+        "message": "API Anahtarı",
+        "description": "Label for AI API key input"
+    },
+    "aiModel": {
+        "message": "Model Adı",
+        "description": "Label for AI model name input"
+    },
+    "aiModelPlaceholder": {
+        "message": "gpt-4o-mini",
+        "description": "Placeholder for AI model input"
+    },
+    "aiTestConnection": {
+        "message": "Bağlantıyı Test Et",
+        "description": "Button to test AI API connection"
+    },
+    "aiTestSuccess": {
+        "message": "Bağlantı başarılı!",
+        "description": "Success message for AI connection test"
+    },
+    "aiTestFail": {
+        "message": "Bağlantı başarısız. Ayarlarınızı kontrol edin.",
+        "description": "Failure message for AI connection test"
+    },
+    "aiTestInProgress": {
+        "message": "Test ediliyor...",
+        "description": "Progress message for AI connection test"
+    },
+    "aiTranslating": {
+        "message": "AI ile çevriliyor...",
+        "description": "Message shown while AI translation is in progress"
+    },
+    "aiThinkMode": {
+        "message": "Düşünme Modu",
+        "description": "Label for AI thinking mode toggle"
+    },
+    "thinkModeOn": {
+        "message": "Açık",
+        "description": "Thinking mode toggle - on state"
+    },
+    "thinkModeOff": {
+        "message": "Kapalı",
+        "description": "Thinking mode toggle - off state"
+    },
+    "aiFailover": {
+        "message": "Anlık önizleme",
+        "description": "Label for the AI failover toggle"
+    },
+    "failoverOn": {
+        "message": "Açık",
+        "description": "Failover toggle - on state"
+    },
+    "failoverOff": {
+        "message": "Kapalı",
+        "description": "Failover toggle - off state"
+    },
+    "clearSongCache": {
+        "message": "Mevcut şarkı önbelleğini temizle",
+        "description": "Button to clear the cached translations for the current song"
+    },
+    "clearAllCache": {
+        "message": "Tüm önbelleği temizle",
+        "description": "Button to clear all cached translations"
+    },
+    "debugTitle": {
+        "message": "Hata Ayıklama",
+        "description": "Title for the debug section"
+    },
+    "clearStorage": {
+        "message": "Uzantı depolamasını temizle",
+        "description": "Debug button to clear all saved extension settings"
+    },
+    "clearStorageHint": {
+        "message": "Kaydedilen tüm ayarları siler: hedef dil, şarkı sözü modu ve yazı tipi boyutu, çeviri sağlayıcısı ve AI uç noktanız, API anahtarınız, modeliniz ve düğmeleriniz. Uzantı varsayılanlara sıfırlanır.",
+        "description": "Explanation of what clearing the extension storage removes"
+    },
+    "confirmClear": {
+        "message": "Onaylamak için tekrar tıklayın",
+        "description": "Confirmation prompt shown on a clear-cache button after the first click"
     }
 }

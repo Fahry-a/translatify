@@ -1,7 +1,7 @@
 {
     "extName": {
         "message": "Translatify - Terjemahkan Lirik Spotify",
-        "description": "Nama ekstensi"
+        "description": "Extension name"
     },
     "extDesc": {
         "message": "Terjemahkan lirik Spotify secara instan ke dalam bahasa Anda secara real-time.",
@@ -9,50 +9,170 @@
     },
     "targetLanguage": {
         "message": "Bahasa tujuan",
-        "description": "Bahasa tujuan"
+        "description": "Target language"
     },
     "applyLanguage": {
         "message": "Terapkan pilihan bahasa",
-        "description": "Terapkan pilihan bahasa"
+        "description": "Apply language selection"
     },
     "lyricsMode": {
         "message": "Mode lirik",
-        "description": "Mode lirik"
+        "description": "Lyrics mode"
     },
     "along": {
         "message": "Tampilkan lirik terjemahan bersama yang asli",
-        "description": "Tampilkan lirik terjemahan bersama yang asli"
+        "description": "Show translated lyrics along original"
     },
     "replace": {
         "message": "Gantikan lirik dengan terjemahan",
-        "description": "Gantikan lirik dengan terjemahan"
+        "description": "Replace lyrics with translation"
     },
     "lyricsSize": {
         "message": "Ukuran font lirik terjemahan",
-        "description": "Ukuran font lirik terjemahan"
+        "description": "Font size of translated lyrics"
     },
     "toggleTip": {
-        "message": "- 🎵 Aktifkan tombol terjemahan di bilah kontrol pemutar!",
-        "description": "Tip tombol terjemahan"
+        "message": "- 🎵 Aktifkan tombol terjemahan di bilah kontrol pemutar! ",
+        "description": "toggle tip"
     },
     "githubRepo": {
         "message": "Lihat repositori GitHub sumber terbuka!",
-        "description": "Repositori GitHub"
+        "description": "github repo"
     },
     "reviewLink": {
         "message": "★ Tinggalkan ulasan!",
-        "description": "Tautan ulasan"
+        "description": "Chrome Web Store review link"
     },
     "translateToggle": {
         "message": "Aktifkan Terjemahan",
-        "description": "Tombol aktif/nonaktif terjemahan"
+        "description": "Toggle for enabling/disabling translation"
     },
     "translationOn": {
         "message": "Aktif",
-        "description": "Terjemahan aktif"
+        "description": "Translation toggle - on state"
     },
     "translationOff": {
         "message": "Nonaktif",
-        "description": "Terjemahan nonaktif"
+        "description": "Translation toggle - off state"
+    },
+    "translationProvider": {
+        "message": "Penyedia Terjemahan",
+        "description": "Label for translation provider selector"
+    },
+    "providerGoogle": {
+        "message": "Google Translate",
+        "description": "Google Translate provider option"
+    },
+    "providerCustomAI": {
+        "message": "AI Kustom (kompatibel OpenAI)",
+        "description": "Custom AI provider option"
+    },
+    "providerDlx": {
+        "message": "DLX",
+        "description": "DLX provider option"
+    },
+    "dlxEndpoint": {
+        "message": "URL Endpoint DLX",
+        "description": "Label for DLX endpoint input"
+    },
+    "dlxEndpointHint": {
+        "message": "Masukkan endpoint yang kompatibel dengan DLX (self-hosted atau instance publik — lihat wiki untuk pilihannya).",
+        "description": "Hint explaining the DLX endpoint field"
+    },
+    "dlxTestConnection": {
+        "message": "Tes Koneksi",
+        "description": "Button to test DLX endpoint connection"
+    },
+    "aiEndpoint": {
+        "message": "URL Endpoint API",
+        "description": "Label for AI API endpoint input"
+    },
+    "aiEndpointPlaceholder": {
+        "message": "https://api.openai.com/v1",
+        "description": "Placeholder for AI endpoint input"
+    },
+    "aiEndpointHint": {
+        "message": "/chat/completions akan ditambahkan ke URL ini",
+        "description": "Hint explaining that /chat/completions is appended to the endpoint URL"
+    },
+    "aiApiKey": {
+        "message": "Kunci API",
+        "description": "Label for AI API key input"
+    },
+    "aiModel": {
+        "message": "Nama Model",
+        "description": "Label for AI model name input"
+    },
+    "aiModelPlaceholder": {
+        "message": "gpt-4o-mini",
+        "description": "Placeholder for AI model input"
+    },
+    "aiTestConnection": {
+        "message": "Tes Koneksi",
+        "description": "Button to test AI API connection"
+    },
+    "aiTestSuccess": {
+        "message": "Koneksi berhasil!",
+        "description": "Success message for AI connection test"
+    },
+    "aiTestFail": {
+        "message": "Koneksi gagal. Periksa pengaturan Anda.",
+        "description": "Failure message for AI connection test"
+    },
+    "aiTestInProgress": {
+        "message": "Menguji...",
+        "description": "Progress message for AI connection test"
+    },
+    "aiTranslating": {
+        "message": "Menerjemahkan dengan AI...",
+        "description": "Message shown while AI translation is in progress"
+    },
+    "aiThinkMode": {
+        "message": "Mode Berpikir",
+        "description": "Label for AI thinking mode toggle"
+    },
+    "thinkModeOn": {
+        "message": "Aktif",
+        "description": "Thinking mode toggle - on state"
+    },
+    "thinkModeOff": {
+        "message": "Nonaktif",
+        "description": "Thinking mode toggle - off state"
+    },
+    "aiFailover": {
+        "message": "Pratinjau instan",
+        "description": "Label for the AI failover toggle"
+    },
+    "failoverOn": {
+        "message": "Aktif",
+        "description": "Failover toggle - on state"
+    },
+    "failoverOff": {
+        "message": "Nonaktif",
+        "description": "Failover toggle - off state"
+    },
+    "clearSongCache": {
+        "message": "Hapus cache lagu saat ini",
+        "description": "Button to clear the cached translations for the current song"
+    },
+    "clearAllCache": {
+        "message": "Hapus semua cache",
+        "description": "Button to clear all cached translations"
+    },
+    "debugTitle": {
+        "message": "Debug",
+        "description": "Title for the debug section"
+    },
+    "clearStorage": {
+        "message": "Hapus penyimpanan ekstensi",
+        "description": "Debug button to clear all saved extension settings"
+    },
+    "clearStorageHint": {
+        "message": "Menghapus semua pengaturan tersimpan: bahasa tujuan, mode lirik & ukuran font, penyedia terjemahan, serta endpoint AI, kunci API, model, dan tombol Anda. Ekstensi kembali ke pengaturan default.",
+        "description": "Explanation of what clearing the extension storage removes"
+    },
+    "confirmClear": {
+        "message": "Klik sekali lagi untuk konfirmasi",
+        "description": "Confirmation prompt shown on a clear-cache button after the first click"
     }
 }
