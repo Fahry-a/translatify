@@ -406,7 +406,8 @@ h4.subtitle {
     /* ==========================================================================
    AI settings
    ========================================================================== */
-    #aiSettings {
+    #aiSettings,
+    #dlxSettings {
         margin-top: 12px;
     }
 
@@ -439,13 +440,15 @@ h4.subtitle {
         margin-bottom: 10px;
     }
 
-    #aiTestConnection {
+    #aiTestConnection,
+    #dlxTestConnection {
         /* #applyLanguage gets 10px flex-gap from .optionDiv + 10px margin = 20px.
-       This button is nested in #aiSettings (no flex gap), so match with 20px. */
+       This button is nested in a provider panel (no flex gap), so match with 20px. */
         margin-top: 20px;
     }
 
-    #aiTestStatus {
+    #aiTestStatus,
+    #dlxTestStatus {
         display: block;
         text-align: center;
         margin-top: 8px;
@@ -454,19 +457,23 @@ h4.subtitle {
     }
 
     /* Collapse the reserved status line until a test message is shown, so there's
-   no extra blank space at the bottom of the AI provider section. */
-    #aiTestStatus:empty {
+   no extra blank space at the bottom of the provider section. */
+    #aiTestStatus:empty,
+    #dlxTestStatus:empty {
         display: none;
     }
 
-    #aiTestStatus.success {
+    #aiTestStatus.success,
+    #dlxTestStatus.success {
         color: var(--text);
     }
 
-    #aiTestStatus.error {
+    #aiTestStatus.error,
+    #dlxTestStatus.error {
         color: var(--error);
     }
 
-    #aiTestStatus.loading {
+    #aiTestStatus.loading,
+    #dlxTestStatus.loading {
         color: var(--warning);
     }
