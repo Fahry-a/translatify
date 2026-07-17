@@ -20,6 +20,7 @@
         "styles/translatify.css"
       ],
       "js": [
+        "scripts/providers.js",
         "scripts/translateButton.js",
         "scripts/lyricsTranslator.js",
         "scripts/main.js"

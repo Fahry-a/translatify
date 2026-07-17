@@ -127,10 +127,15 @@ chrome.storage.local.get(['translationProvider', 'aiEndpoint', 'aiApiKey', 'aiMo
 });
 
 // Show the settings panel for the selected provider, hide the others.
+// Panels come from the registry (scripts/providers.js), so a new provider
+// only needs a panelId there plus its markup in popup.html.
 function updateProviderSettingsVisibility() {
     const provider = translationProvider.value;
-    aiSettings.style.display = provider === 'customAI' ? 'block' : 'none';
-    dlxSettings.style.display = provider === 'dlx' ? 'block' : 'none';
+    for (const [id, spec] of Object.entries(TRANSLATION_PROVIDERS)) {
+        if (!spec.panelId) continue;
+        const panel = document.getElementById(spec.panelId);
+        if (panel) panel.style.display = provider === id ? 'block' : 'none';
+    }
 }
 
 function sendToSpotifyTabs(message) {
@@ -182,30 +187,38 @@ dlxTranslationMode.addEventListener('change', async () => {
     sendToSpotifyTabs({ updateDlxTranslationMode: mode });
 });
 
+// Shared status rendering for the provider "Test Connection" buttons.
+function setTestStatus(el, state, detail) {
+    if (state === 'loading') {
+        el.textContent = chrome.i18n.getMessage('aiTestInProgress') || 'Testing...';
+        el.className = 'loading';
+    } else if (state === 'success') {
+        el.textContent = chrome.i18n.getMessage('aiTestSuccess') || 'Connection successful!';
+        el.className = 'success';
+    } else {
+        el.textContent = (chrome.i18n.getMessage('aiTestFail') || 'Connection failed.') + (detail ? ` (${detail})` : '');
+        el.className = 'error';
+    }
+}
+
 dlxTestConnection.addEventListener('click', async () => {
     const endpoint = dlxEndpoint.value.trim();
     if (endpoint) {
         const granted = await ensureHostPermission(endpoint);
         if (!granted) {
-            dlxTestStatus.textContent = (chrome.i18n.getMessage('aiTestFail') || 'Connection failed.') + ' (access to the endpoint was not granted)';
-            dlxTestStatus.className = 'error';
-            return;
+            return setTestStatus(dlxTestStatus, 'error', 'access to the endpoint was not granted');
         }
     }
-    dlxTestStatus.textContent = chrome.i18n.getMessage('aiTestInProgress') || 'Testing...';
-    dlxTestStatus.className = 'loading';
+    setTestStatus(dlxTestStatus, 'loading');
     try {
-        const response = await chrome.runtime.sendMessage({ type: 'TEST_DLX', endpoint });
+        const response = await chrome.runtime.sendMessage({ type: 'TEST_PROVIDER', provider: 'dlx', endpoint });
         if (response?.ok) {
-            dlxTestStatus.textContent = chrome.i18n.getMessage('aiTestSuccess') || 'Connection successful!';
-            dlxTestStatus.className = 'success';
+            setTestStatus(dlxTestStatus, 'success');
         } else {
-            dlxTestStatus.textContent = (chrome.i18n.getMessage('aiTestFail') || 'Connection failed.') + ` (${response?.error || 'unknown error'})`;
-            dlxTestStatus.className = 'error';
+            setTestStatus(dlxTestStatus, 'error', response?.error || 'unknown error');
         }
     } catch (e) {
-        dlxTestStatus.textContent = (chrome.i18n.getMessage('aiTestFail') || 'Connection failed.') + ` (${e.message})`;
-        dlxTestStatus.className = 'error';
+        setTestStatus(dlxTestStatus, 'error', e.message);
     }
 });
 
@@ -319,20 +332,15 @@ aiTestConnection.addEventListener('click', async () => {
     const model = aiModel.value.trim();
 
     if (!endpoint || !apiKey) {
-        aiTestStatus.textContent = chrome.i18n.getMessage('aiTestFail') || 'Connection failed. Check your settings.';
-        aiTestStatus.className = 'error';
-        return;
+        return setTestStatus(aiTestStatus, 'error');
     }
 
     const granted = await ensureHostPermission(endpoint);
     if (!granted) {
-        aiTestStatus.textContent = (chrome.i18n.getMessage('aiTestFail') || 'Connection failed.') + ' (access to the endpoint was not granted)';
-        aiTestStatus.className = 'error';
-        return;
+        return setTestStatus(aiTestStatus, 'error', 'access to the endpoint was not granted');
     }
 
-    aiTestStatus.textContent = chrome.i18n.getMessage('aiTestInProgress') || 'Testing...';
-    aiTestStatus.className = 'loading';
+    setTestStatus(aiTestStatus, 'loading');
 
     try {
         const baseUrl = endpoint.replace(/\/+$/, '');
@@ -355,24 +363,18 @@ aiTestConnection.addEventListener('click', async () => {
             try {
                 const data = await response.json();
                 if (data.choices || data.id || data.object) {
-                    aiTestStatus.textContent = chrome.i18n.getMessage('aiTestSuccess') || 'Connection successful!';
-                    aiTestStatus.className = 'success';
+                    setTestStatus(aiTestStatus, 'success');
                 } else {
-                    aiTestStatus.textContent = (chrome.i18n.getMessage('aiTestFail') || 'Connection failed. Check your settings.') + ' (unexpected response format)';
-                    aiTestStatus.className = 'error';
+                    setTestStatus(aiTestStatus, 'error', 'unexpected response format');
                 }
             } catch {
-                aiTestStatus.textContent = (chrome.i18n.getMessage('aiTestFail') || 'Connection failed.') + ' (endpoint returned non-JSON — check the URL includes the full API path, e.g. /v1)';
-                aiTestStatus.className = 'error';
+                setTestStatus(aiTestStatus, 'error', 'endpoint returned non-JSON; check the URL includes the full API path, e.g. /v1');
             }
         } else {
-            const errorText = await response.text();
-            aiTestStatus.textContent = (chrome.i18n.getMessage('aiTestFail') || 'Connection failed.') + ` (${response.status})`;
-            aiTestStatus.className = 'error';
+            setTestStatus(aiTestStatus, 'error', String(response.status));
         }
     } catch (e) {
-        aiTestStatus.textContent = (chrome.i18n.getMessage('aiTestFail') || 'Connection failed.') + ` (${e.message})`;
-        aiTestStatus.className = 'error';
+        setTestStatus(aiTestStatus, 'error', e.message);
     }
 });
 

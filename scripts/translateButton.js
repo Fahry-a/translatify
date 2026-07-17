@@ -25,12 +25,16 @@ function setTranslateError(active) {
     if (loader) loader.classList.toggle("has-error", !!active);
 }
 
-// Toggles the rainbow-hue AI indicator class on the translate button.
-function updateTranslateButtonAIState() {
+// Applies each provider's indicator class from the registry to the translate
+// button (e.g. the rainbow-hue class while Custom AI is selected).
+function updateTranslateButtonProviderState() {
     const translateButton = document.querySelector("button[data-testid='translate-button']");
     if (!translateButton || !isExtensionAlive()) return;
     chrome.storage.local.get(['translationProvider']).then(result => {
-        translateButton.classList.toggle('translateButton--ai', result.translationProvider === 'customAI');
+        for (const [id, spec] of Object.entries(TRANSLATION_PROVIDERS)) {
+            if (!spec.buttonClass) continue;
+            translateButton.classList.toggle(spec.buttonClass, result.translationProvider === id);
+        }
     }).catch(() => {});
 }
 
@@ -45,7 +49,7 @@ function loadChecker() {
         addTranslateButton();
         enableTranslateButton();
         setupListening();
-        updateTranslateButtonAIState();
+        updateTranslateButtonProviderState();
 
         // Check if the translate button was enabled on previous session
         chrome.storage.local.get(["translateButton"]).then((result) => {
@@ -79,7 +83,7 @@ function ensureTranslateButton() {
     eraseButton(); // safety: clear any stale leftover loader
     addTranslateButton();
     enableTranslateButton();
-    updateTranslateButtonAIState();
+    updateTranslateButtonProviderState();
 
     // Re-apply the enabled state from the previous session so the user isn't
     // forced to click the button again after a silent re-inject.
@@ -269,6 +273,6 @@ chrome.runtime.onMessage.addListener(msgObj => {
         }
     }
     if (msgObj.updateTranslationProvider !== undefined || msgObj.updateAiSettings !== undefined) {
-        updateTranslateButtonAIState();
+        updateTranslateButtonProviderState();
     }
 });
