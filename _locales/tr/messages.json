@@ -76,12 +76,24 @@
         "description": "Label for DLX endpoint input"
     },
     "dlxEndpointHint": {
-        "message": "DLX uyumlu bir uç nokta girin (kendi kendine barındırılan veya genel bir örnek — seçenekler için wiki'ye bakın).",
+        "message": "DLX uyumlu bir uç nokta girin (kendi barındırdığınız veya genel bir örnek). Seçenekler için wiki'ye bakın.",
         "description": "Hint explaining the DLX endpoint field"
     },
     "dlxTestConnection": {
         "message": "Bağlantıyı Test Et",
         "description": "Button to test DLX endpoint connection"
+    },
+    "dlxTranslationMode": {
+        "message": "Çeviri Modu",
+        "description": "Label for the DLX translation mode selector"
+    },
+    "dlxModeBatch": {
+        "message": "Toplu (şarkı başına tek istek)",
+        "description": "DLX mode option: batch (one request per song)"
+    },
+    "dlxModePerLine": {
+        "message": "Satır satır (her söz satırı için bir istek)",
+        "description": "DLX mode option: per line (one request per lyric line)"
     },
     "aiEndpoint": {
         "message": "API Uç Nokta URL'si",

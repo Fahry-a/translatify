@@ -76,12 +76,24 @@
         "description": "Label for DLX endpoint input"
     },
     "dlxEndpointHint": {
-        "message": "Masukkan endpoint yang kompatibel dengan DLX (self-hosted atau instance publik — lihat wiki untuk pilihannya).",
+        "message": "Masukkan endpoint yang kompatibel dengan DLX (self-hosted atau instance publik). Lihat wiki untuk pilihannya.",
         "description": "Hint explaining the DLX endpoint field"
     },
     "dlxTestConnection": {
         "message": "Tes Koneksi",
         "description": "Button to test DLX endpoint connection"
+    },
+    "dlxTranslationMode": {
+        "message": "Mode Terjemahan",
+        "description": "Label for the DLX translation mode selector"
+    },
+    "dlxModeBatch": {
+        "message": "Batch (satu permintaan per lagu)",
+        "description": "DLX mode option: batch (one request per song)"
+    },
+    "dlxModePerLine": {
+        "message": "Per baris (satu permintaan per baris lirik)",
+        "description": "DLX mode option: per line (one request per lyric line)"
     },
     "aiEndpoint": {
         "message": "URL Endpoint API",

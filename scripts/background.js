@@ -164,6 +164,29 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         return true;
     }
 
+    if (msg.type === 'TRANSLATE_DLX_BATCH') {
+        (async () => {
+            try {
+                const lines = Array.isArray(msg.lines) ? msg.lines : [];
+                if (lines.length === 0) return sendResponse({ error: 'DLX batch: no lines given' });
+                // DLX preserves newlines, so the whole sheet goes out as one
+                // request and comes back as one string to split up again.
+                const result = await translateWithDlx(lines.join('\n'), msg.sourceLanguage, msg.destinationLanguage);
+                const translations = (result || '').split('\n');
+                if (translations.length !== lines.length) {
+                    // The endpoint merged or dropped lines; the caller falls
+                    // back to per-line requests rather than misaligning lyrics.
+                    return sendResponse({ error: `DLX batch line count mismatch (got ${translations.length} for ${lines.length} lines)` });
+                }
+                sendResponse({ translations });
+            } catch (e) {
+                console.error('Translatify: DLX batch translation failed', e.message);
+                sendResponse({ error: `DLX batch translation failed: ${e.message}` });
+            }
+        })();
+        return true;
+    }
+
     if (msg.type === 'TEST_DLX') {
         (async () => {
             try {

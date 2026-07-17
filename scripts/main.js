@@ -144,6 +144,12 @@ function run() {
             translate();
         }
 
+        if (msgObj.updateDlxTranslationMode) {
+            console.log("Translatify: DLX translation mode updated to", msgObj.updateDlxTranslationMode);
+            restoreLyrics();
+            translate();
+        }
+
         if (msgObj.updateAiThinkMode !== undefined) {
             console.log("Translatify: AI think mode updated to", msgObj.updateAiThinkMode);
             restoreLyrics();

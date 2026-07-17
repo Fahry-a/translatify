@@ -49,6 +49,11 @@ function lineCacheKey(text, sourceLanguage, destinationLanguage) {
     return `${activeProvider}|${text}|${sourceLanguage}|${destinationLanguage}`;
 }
 
+// Whether DLX translates the whole sheet in one request ('batch', the default)
+// or one request per line ('perline'). User choice, stored as dlxTranslationMode;
+// refreshed on every pass in runTranslate().
+let dlxBatchEnabled = true;
+
 // Re-entrancy guard for translate(), set before any await.
 let translateInFlight = false;
 
@@ -150,15 +155,6 @@ function getSongInfo() {
         songTitle: titleEl?.textContent?.trim() || '',
         artistName: artistEl?.textContent?.trim() || ''
     };
-}
-
-async function translateLineByLine(lines, sourceLanguage, destinationLanguage) {
-    const results = [];
-    for (const text of lines) {
-        const translated = await translateText(text, sourceLanguage, destinationLanguage);
-        results.push(translated != null ? translated : text);
-    }
-    return results;
 }
 
 async function translateBatchWithAI(lines, sourceLanguage, destinationLanguage) {
@@ -388,6 +384,71 @@ async function translateLineByLineWithGoogle(sourceLanguage, destinationLanguage
     setupMutationObserver();
 }
 
+// Translate the whole lyric sheet in one DLX request (DLX preserves newlines),
+// then render every wrapper from the per-line cache. Much kinder to public DLX
+// instances than one POST per line. Falls back to the per-line flow when the
+// batch fails (network error, endpoint quirk, line-count mismatch).
+async function translateBatchWithDlx(sourceLanguage, destinationLanguage) {
+    const lyricsWrapperList = document.querySelectorAll(lyricLine);
+
+    if (lyricsWrapperList.length === 0) {
+        console.log("Translatify: lyrics not found, retrying..");
+        return setTimeout(translate, 100);
+    }
+
+    // Unique lines that actually need a request: translatable and not cached.
+    const uncached = [...new Set(
+        Array.from(lyricsWrapperList)
+            .map(w => w.firstChild?.textContent)
+            .filter(text => text && !isUntranslatable(text) &&
+                !translationCache.has(lineCacheKey(text, sourceLanguage, destinationLanguage)))
+    )];
+
+    if (uncached.length > 0) {
+        if (!isExtensionAlive()) return;
+        let response;
+        try {
+            response = await chrome.runtime.sendMessage({
+                type: 'TRANSLATE_DLX_BATCH',
+                lines: uncached,
+                sourceLanguage,
+                destinationLanguage
+            });
+        } catch {
+            response = null;
+        }
+
+        if (!response || response.error || !Array.isArray(response.translations)) {
+            if (response?.error) console.error('Translatify: DLX batch failed, falling back to per-line:', response.error);
+            return translateLineByLineWithGoogle(sourceLanguage, destinationLanguage);
+        }
+
+        uncached.forEach((text, i) => {
+            if (response.translations[i] != null) {
+                translationCache.set(lineCacheKey(text, sourceLanguage, destinationLanguage), response.translations[i]);
+            }
+        });
+    }
+
+    // Render every visible wrapper from the cache. The DOM may have changed
+    // while the request was in flight, so re-query and match by text.
+    // Untranslatable lines (pure punctuation, "♪") are "translated" to
+    // themselves like the per-line flow does, so they get marked and don't
+    // keep the observer's catch-up pass firing forever.
+    document.querySelectorAll(lyricLine).forEach(wrapper => {
+        if (wrapper.classList.contains("modifedLyricsWrapper")) return;
+        const text = wrapper.firstChild?.textContent;
+        if (!text) return;
+        const translated = isUntranslatable(text)
+            ? text
+            : translationCache.get(lineCacheKey(text, sourceLanguage, destinationLanguage));
+        if (translated != null) replaceLyric(translated, wrapper);
+    });
+
+    focusActiveLyric();
+    setupMutationObserver();
+}
+
 // Batch translate all lyrics with AI, then render them
 async function translateBatchWithAIAndRender(sourceLanguage, destinationLanguage) {
     const lyricsWrapperList = document.querySelectorAll(lyricLine);
@@ -548,10 +609,11 @@ async function runTranslate() {
         // they're missing: TRANSLATE_DLX has no fallback of its own in the
         // background, so routing there without an endpoint would just error on
         // every line and leave the lyrics untranslated.
-        const settings = await chrome.storage.local.get(['translationProvider', 'aiEndpoint', 'dlxEndpoint']);
+        const settings = await chrome.storage.local.get(['translationProvider', 'aiEndpoint', 'dlxEndpoint', 'dlxTranslationMode']);
         // Make the active provider visible to translateText() so per-line calls
         // (both in the live pass and the MutationObserver) use the right endpoint.
         activeProvider = (settings.translationProvider === 'dlx' && settings.dlxEndpoint) ? 'dlx' : 'google';
+        dlxBatchEnabled = settings.dlxTranslationMode !== 'perline';
         // Show the loading indicator only while lyrics are actually being fetched/rendered.
         setTranslatingIndicator(true);
         let aiErrored = false;
@@ -561,6 +623,8 @@ async function runTranslate() {
                 // defaults for the failover pre-pass so Google still works there.
                 activeProvider = 'google';
                 aiErrored = (await translateBatchWithAIAndRender(sourceLanguage, destinationLanguage)) === false;
+            } else if (activeProvider === 'dlx' && dlxBatchEnabled) {
+                await translateBatchWithDlx(sourceLanguage, destinationLanguage);
             } else {
                 await translateLineByLineWithGoogle(sourceLanguage, destinationLanguage);
             }

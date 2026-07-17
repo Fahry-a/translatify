@@ -76,12 +76,24 @@
         "description": "Label for DLX endpoint input"
     },
     "dlxEndpointHint": {
-        "message": "Introduce un endpoint compatible con DLX (autoalojado o una instancia pública — consulta la wiki para opciones).",
+        "message": "Introduce un endpoint compatible con DLX (autoalojado o una instancia pública). Consulta la wiki para ver opciones.",
         "description": "Hint explaining the DLX endpoint field"
     },
     "dlxTestConnection": {
         "message": "Probar conexión",
         "description": "Button to test DLX endpoint connection"
+    },
+    "dlxTranslationMode": {
+        "message": "Modo de traducción",
+        "description": "Label for the DLX translation mode selector"
+    },
+    "dlxModeBatch": {
+        "message": "Por lotes (una solicitud por canción)",
+        "description": "DLX mode option: batch (one request per song)"
+    },
+    "dlxModePerLine": {
+        "message": "Línea por línea (una solicitud por línea)",
+        "description": "DLX mode option: per line (one request per lyric line)"
     },
     "aiEndpoint": {
         "message": "URL del endpoint de la API",

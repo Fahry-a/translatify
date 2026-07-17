@@ -76,12 +76,24 @@
         "description": "Label for DLX endpoint input"
     },
     "dlxEndpointHint": {
-        "message": "请输入兼容 DLX 的端点（可自建，或使用公共实例——详见 wiki）。",
+        "message": "请输入兼容 DLX 的端点（可自建，或使用公共实例）。详见 wiki。",
         "description": "Hint explaining the DLX endpoint field"
     },
     "dlxTestConnection": {
         "message": "测试连接",
         "description": "Button to test DLX endpoint connection"
+    },
+    "dlxTranslationMode": {
+        "message": "翻译模式",
+        "description": "Label for the DLX translation mode selector"
+    },
+    "dlxModeBatch": {
+        "message": "批量（每首歌一次请求）",
+        "description": "DLX mode option: batch (one request per song)"
+    },
+    "dlxModePerLine": {
+        "message": "逐行（每行歌词一次请求）",
+        "description": "DLX mode option: per line (one request per lyric line)"
     },
     "aiEndpoint": {
         "message": "API 端点地址",

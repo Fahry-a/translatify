@@ -76,12 +76,24 @@
         "description": "Label for DLX endpoint input"
     },
     "dlxEndpointHint": {
-        "message": "DLX 호환 엔드포인트를 입력하세요 (자체 호스팅 또는 공개 인스턴스 — 옵션은 wiki 참조).",
+        "message": "DLX 호환 엔드포인트를 입력하세요 (자체 호스팅 또는 공개 인스턴스). 옵션은 wiki를 참조하세요.",
         "description": "Hint explaining the DLX endpoint field"
     },
     "dlxTestConnection": {
         "message": "연결 테스트",
         "description": "Button to test DLX endpoint connection"
+    },
+    "dlxTranslationMode": {
+        "message": "번역 모드",
+        "description": "Label for the DLX translation mode selector"
+    },
+    "dlxModeBatch": {
+        "message": "일괄 (곡당 요청 1회)",
+        "description": "DLX mode option: batch (one request per song)"
+    },
+    "dlxModePerLine": {
+        "message": "행별 (가사 한 줄당 요청 1회)",
+        "description": "DLX mode option: per line (one request per lyric line)"
     },
     "aiEndpoint": {
         "message": "API 엔드포인트 URL",

@@ -64,9 +64,15 @@
         <h4 class="subtitle" data-locale="dlxEndpoint">DLX Endpoint URL</h4>
        
         <input type="text" id="dlxEndpoint" class="aiInput" placeholder="https://your-dlx-instance.example.com/translate">
-        <span class="aiHint" data-locale="dlxEndpointHint">Enter a DLX-compatible endpoint (self-hosted or a public instance — see the wiki for options).</span>
+        <span class="aiHint" data-locale="dlxEndpointHint">Enter a DLX-compatible endpoint (self-hosted or a public instance). See the wiki for options.</span>
         <button id="dlxTestConnection" data-locale="dlxTestConnection">Test Connection</button>
         <span id="dlxTestStatus"></span>
+
+        <h4 class="subtitle" data-locale="dlxTranslationMode">Translation Mode</h4>
+        <select id="dlxTranslationMode" class="selectOptions">
+          <option value="batch" data-locale="dlxModeBatch">Batch (one request per song)</option>
+          <option value="perline" data-locale="dlxModePerLine">Per line (one request per lyric line)</option>
+        </select>
       </div>
 
       <div id="aiSettings" style="display:none;">

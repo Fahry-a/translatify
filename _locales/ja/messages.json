@@ -76,12 +76,24 @@
         "description": "Label for DLX endpoint input"
     },
     "dlxEndpointHint": {
-        "message": "DLX 互換のエンドポイントを入力してください（自己ホストまたは公開インスタンス — オプションは wiki を参照）。",
+        "message": "DLX 互換のエンドポイントを入力してください（自己ホストまたは公開インスタンス）。詳しくは wiki を参照してください。",
         "description": "Hint explaining the DLX endpoint field"
     },
     "dlxTestConnection": {
         "message": "接続テスト",
         "description": "Button to test DLX endpoint connection"
+    },
+    "dlxTranslationMode": {
+        "message": "翻訳モード",
+        "description": "Label for the DLX translation mode selector"
+    },
+    "dlxModeBatch": {
+        "message": "バッチ（1曲につき1リクエスト）",
+        "description": "DLX mode option: batch (one request per song)"
+    },
+    "dlxModePerLine": {
+        "message": "行ごと（歌詞1行につき1リクエスト）",
+        "description": "DLX mode option: per line (one request per lyric line)"
     },
     "aiEndpoint": {
         "message": "API エンドポイント URL",

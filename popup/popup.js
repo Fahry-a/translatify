@@ -22,6 +22,7 @@ const dlxSettings = document.getElementById('dlxSettings');
 const dlxEndpoint = document.getElementById('dlxEndpoint');
 const dlxTestConnection = document.getElementById('dlxTestConnection');
 const dlxTestStatus = document.getElementById('dlxTestStatus');
+const dlxTranslationMode = document.getElementById('dlxTranslationMode');
 const clearSongCache = document.getElementById('clearSongCache');
 const clearAllCache = document.getElementById('clearAllCache');
 const clearStorage = document.getElementById('clearStorage');
@@ -99,7 +100,7 @@ chrome.storage.local.get(['translateButton'], (result) => {
 });
 
 // Load translation provider settings
-chrome.storage.local.get(['translationProvider', 'aiEndpoint', 'aiApiKey', 'aiModel', 'aiThinkMode', 'aiFailover', 'dlxEndpoint'], (result) => {
+chrome.storage.local.get(['translationProvider', 'aiEndpoint', 'aiApiKey', 'aiModel', 'aiThinkMode', 'aiFailover', 'dlxEndpoint', 'dlxTranslationMode'], (result) => {
     if (result.translationProvider) {
         translationProvider.value = result.translationProvider;
     }
@@ -120,6 +121,8 @@ chrome.storage.local.get(['translationProvider', 'aiEndpoint', 'aiApiKey', 'aiMo
     if (result.dlxEndpoint) {
         dlxEndpoint.value = result.dlxEndpoint;
     }
+    // Batch is the default: fewer requests, kinder to public DLX instances.
+    dlxTranslationMode.value = result.dlxTranslationMode || 'batch';
     updateProviderSettingsVisibility();
 });
 
@@ -172,6 +175,12 @@ async function saveAndPropagateDlxSettings() {
 }
 
 dlxEndpoint.addEventListener('change', saveAndPropagateDlxSettings);
+
+dlxTranslationMode.addEventListener('change', async () => {
+    const mode = dlxTranslationMode.value;
+    await chrome.storage.local.set({dlxTranslationMode: mode});
+    sendToSpotifyTabs({ updateDlxTranslationMode: mode });
+});
 
 dlxTestConnection.addEventListener('click', async () => {
     const endpoint = dlxEndpoint.value.trim();
