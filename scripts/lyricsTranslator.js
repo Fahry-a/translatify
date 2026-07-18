@@ -296,9 +296,7 @@ async function setupMutationObserver(provider) {
             const cacheKey = lineCacheKey(provider, lyricsText, sourceLanguage, destinationLanguage);
             if (translationCache.has(cacheKey)) {
                 replaceLyric(translationCache.get(cacheKey), wrapper);
-            } else if (!(aiBatchPending && !aiFailoverEnabled)) {
-                // Skip Google fallback for new lines while an AI batch is in flight
-                // and failover is disabled — the AI result will translate them.
+            } else if (provider !== 'dlx' && !(aiBatchPending && !aiFailoverEnabled)) {
                 translateAndUpdateAsync(provider, wrapper, lyricsText, sourceLanguage, destinationLanguage);
             }
             focusActiveLyric();
