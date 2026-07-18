@@ -22,6 +22,11 @@ const inFlightTranslations = new Map();
 // Active mutation observers
 const mutationObservers = new Map();
 
+// DLX batch fallback: lines that the MutationObserver found uncached are queued
+// here and batch-translated after a short debounce instead of per-line.
+const dlxPendingMisses = [];
+let dlxDebounceTimer = null;
+
 // To modify if spotify decides to change variable names
 const lyricLine = "div[data-testid='lyrics-line']";
 
@@ -228,6 +233,9 @@ function disconnectAllObservers() {
         console.log('Disconnected observer for:', key);
     });
     mutationObservers.clear();
+    // Flush pending DLX batch fallback
+    if (dlxDebounceTimer) { clearTimeout(dlxDebounceTimer); dlxDebounceTimer = null; }
+    dlxPendingMisses.length = 0;
 }
 
 function restoreLyrics() {
@@ -263,6 +271,48 @@ function restoreLyrics() {
 // goes through restoreLyrics() -> disconnectAllObservers(), so the next pass
 // recreates the observer with the then-current provider — in-flight callbacks
 // can never mix endpoints or cache namespaces.
+
+// Batch-translate queued DLX cache-miss lines after a short debounce so the
+// observer never fires per-line requests (which would give inconsistent results).
+function scheduleDlxBatch() {
+    if (dlxDebounceTimer) clearTimeout(dlxDebounceTimer);
+    dlxDebounceTimer = setTimeout(async () => {
+        const pending = dlxPendingMisses.splice(0);
+        if (pending.length === 0 || !isExtensionAlive()) return;
+
+        const sourceLanguage = pending[0].sourceLanguage;
+        const destinationLanguage = pending[0].destinationLanguage;
+        const uniqueLines = [...new Set(pending.map(p => p.lyricsText))];
+
+        let response;
+        try {
+            response = await chrome.runtime.sendMessage({
+                type: 'TRANSLATE',
+                provider: 'dlx',
+                lines: uniqueLines,
+                sourceLanguage,
+                destinationLanguage
+            });
+        } catch {
+            return;
+        }
+
+        if (!response || response.error || !Array.isArray(response.translations)) return;
+
+        uniqueLines.forEach((text, i) => {
+            if (response.translations[i] != null) {
+                translationCache.set(lineCacheKey('dlx', text, sourceLanguage, destinationLanguage), response.translations[i]);
+            }
+        });
+
+        pending.forEach(({ wrapper, lyricsText }) => {
+            if (wrapper.classList.contains("modifedLyricsWrapper")) return;
+            const translated = translationCache.get(lineCacheKey('dlx', lyricsText, sourceLanguage, destinationLanguage));
+            if (translated != null) replaceLyric(translated, wrapper);
+        });
+    }, 200);
+}
+
 async function setupMutationObserver(provider) {
     // Use a single observer that watches the main view for any changes
     const observerKey = `mainView`;
@@ -296,7 +346,10 @@ async function setupMutationObserver(provider) {
             const cacheKey = lineCacheKey(provider, lyricsText, sourceLanguage, destinationLanguage);
             if (translationCache.has(cacheKey)) {
                 replaceLyric(translationCache.get(cacheKey), wrapper);
-            } else if (provider !== 'dlx' && !(aiBatchPending && !aiFailoverEnabled)) {
+            } else if (provider === 'dlx') {
+                dlxPendingMisses.push({ wrapper, lyricsText, sourceLanguage, destinationLanguage });
+                scheduleDlxBatch();
+            } else if (!(aiBatchPending && !aiFailoverEnabled)) {
                 translateAndUpdateAsync(provider, wrapper, lyricsText, sourceLanguage, destinationLanguage);
             }
             focusActiveLyric();
