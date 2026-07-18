@@ -278,6 +278,7 @@ function scheduleDlxBatch() {
     if (dlxDebounceTimer) clearTimeout(dlxDebounceTimer);
     dlxDebounceTimer = setTimeout(async () => {
         const pending = dlxPendingMisses.splice(0);
+        console.log('Translatify: DLX fallback batch executing for', pending.length, 'lines');
         if (pending.length === 0 || !isExtensionAlive()) return;
 
         const sourceLanguage = pending[0].sourceLanguage;
