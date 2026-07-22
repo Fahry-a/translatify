@@ -174,9 +174,11 @@ translationProvider.addEventListener('change', async () => {
 
 async function saveAndPropagateDlxSettings() {
     const endpoint = dlxEndpoint.value.trim();
-    if (endpoint) await ensureHostPermission(endpoint);
-    await chrome.storage.local.set({dlxEndpoint: endpoint});
-    sendToSpotifyTabs({ updateDlxSettings: { endpoint } });
+    // Dispatch the save first (the permission prompt can close the popup), then
+    // request permission before any await (user-gesture requirement).
+    chrome.storage.local.set({dlxEndpoint: endpoint}).catch(() => {});
+    const granted = !endpoint || await ensureHostPermission(endpoint);
+    if (granted) sendToSpotifyTabs({ updateDlxSettings: { endpoint } });
 }
 
 dlxEndpoint.addEventListener('change', saveAndPropagateDlxSettings);
@@ -214,6 +216,7 @@ dlxTestConnection.addEventListener('click', async () => {
         const response = await chrome.runtime.sendMessage({ type: 'TEST_PROVIDER', provider: 'dlx', endpoint });
         if (response?.ok) {
             setTestStatus(dlxTestStatus, 'success');
+            sendToSpotifyTabs({ updateDlxSettings: { endpoint } });
         } else {
             setTestStatus(dlxTestStatus, 'error', response?.error || 'unknown error');
         }
@@ -248,9 +251,11 @@ async function saveAndPropagateAiSettings() {
     const endpoint = aiEndpoint.value.trim();
     const apiKey = aiApiKey.value.trim();
     const model = aiModel.value.trim();
-    if (endpoint) await ensureHostPermission(endpoint);
-    await chrome.storage.local.set({aiEndpoint: endpoint, aiApiKey: apiKey, aiModel: model});
-    sendToSpotifyTabs({ updateAiSettings: { endpoint, apiKey, model } });
+    // Dispatch the save first (the permission prompt can close the popup), then
+    // request permission before any await (user-gesture requirement).
+    chrome.storage.local.set({aiEndpoint: endpoint, aiApiKey: apiKey, aiModel: model}).catch(() => {});
+    const granted = !endpoint || await ensureHostPermission(endpoint);
+    if (granted) sendToSpotifyTabs({ updateAiSettings: { endpoint, apiKey, model } });
 }
 
 aiEndpoint.addEventListener('change', saveAndPropagateAiSettings);
@@ -364,6 +369,7 @@ aiTestConnection.addEventListener('click', async () => {
                 const data = await response.json();
                 if (data.choices || data.id || data.object) {
                     setTestStatus(aiTestStatus, 'success');
+                    sendToSpotifyTabs({ updateAiSettings: { endpoint, apiKey, model } });
                 } else {
                     setTestStatus(aiTestStatus, 'error', 'unexpected response format');
                 }
