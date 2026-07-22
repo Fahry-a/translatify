@@ -1,9 +1,7 @@
-// Capability registry for translation providers, shared by the popup and the
-// content scripts (loaded before them in both contexts). It drives which
-// settings panel the popup shows, how runTranslate() gates and dispatches, and
-// which storage keys a provider needs — so adding a provider means describing
-// it here (plus a translate function in background.js, which keeps its own map
-// keyed by the same ids) instead of extending if-chains in four files.
+// Capability registry for translation providers, shared by the popup and
+// content scripts. Drives the settings panel, gating/dispatch, and required
+// storage keys. Adding a provider means an entry here plus a translate
+// function in background.js.
 const TRANSLATION_PROVIDERS = {
     google: {
         // Needs no configuration; translates line by line only.
@@ -39,10 +37,9 @@ const PROVIDER_SETTING_KEYS = ['translationProvider', ...Object.values(TRANSLATI
     .flatMap(spec => [...spec.requiredSettings, spec.modeSetting])
     .filter(Boolean)];
 
-// The provider actually used for a pass: the configured one when all of its
-// required settings are present, otherwise google. `fallback` is true when the
-// user's choice could not be honored (unknown or misconfigured provider), so
-// callers can surface that instead of silently translating with Google.
+// The provider used for a pass: the configured one when its required settings
+// are present, otherwise google. `fallback` is true when the user's choice
+// couldn't be honored.
 function resolveTranslationProvider(settings) {
     const requested = settings.translationProvider || FALLBACK_PROVIDER;
     const spec = TRANSLATION_PROVIDERS[requested];

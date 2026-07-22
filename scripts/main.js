@@ -10,10 +10,8 @@ loadChecker();
 run();
 console.log("Translatify: Lyrics Translator is running..");
 
-// Determine the default target language from the browser's preferred languages.
-// navigator.languages / navigator.language are supported on both Chromium and
-// Firefox. The result is normalized to a code the language selector recognizes,
-// and falls back to English when nothing usable is found.
+// Default target language from the browser's preferred languages, normalized
+// to a selector code; falls back to English.
 function getBrowserLanguage() {
     const candidates = [];
     if (Array.isArray(navigator.languages)) candidates.push(...navigator.languages);

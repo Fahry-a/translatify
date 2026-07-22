@@ -17,18 +17,11 @@ const ENDPOINTS = [
     }),
 ];
 
-// No default endpoint is bundled — the user must configure a DLX-compatible
-// endpoint themselves via the popup's "DLX Endpoint URL" field. This keeps
-// the choice of which server receives lyrics text an explicit, conscious one.
-// Leaving source_lang empty triggers auto-detection.
+// No default endpoint is bundled — the user configures a DLX endpoint in the
+// popup. Empty source_lang triggers auto-detection.
 
-// DLX expects uppercase ISO-639-1 codes (EN, ID, ZH, ...). Regional variants
-// use a hyphen + uppercase region (EN-US, PT-BR). DLX also accepts a few
-// 3-letter codes (BHO, CEB, CKB, GOM, KMR, YUE, ...) and language aliases that do
-// NOT follow the simple "uppercase the base code" rule used by the fallback.
-//
-// Only map entries that differ from the fallback to avoid noise. See the full
-// list of supported DLX languages in dlx-lang.md.
+// Maps selector codes to DLX codes. Only entries that differ from the fallback
+// (uppercased base code) are listed. See dlx-lang.md for the full list.
 const DLX_LANG_MAP = {
     // Regional/variant codes where DLX diverges from the simple fallback.
     'zh-cn': 'ZH',
@@ -39,14 +32,11 @@ const DLX_LANG_MAP = {
     'en': 'EN',
     'en-us': 'EN-US',
     'en-gb': 'EN-GB',
-    // Aliases — these selector codes map to a DIFFERENT DLX code than the
-    // naive uppercased base code would produce.
+    // Aliases that map to a different DLX code than the uppercased base.
     'fil': 'TL',   // Filipino  -> DLX's Tagalog (TL), not "FIL"
     'no': 'NB',    // Norwegian -> DLX's Norwegian Bokmål (NB), not "NO"
     'ku': 'KMR',   // Kurdish   -> DLX's Kurmanji (KMR), not "KU"
-    // 3-letter codes supported by DLX. The fallback would actually produce
-    // these correctly, but listing them here guards against case/quoting issues
-    // and documents which 3-letter selector values are DLX-compatible.
+    // 3-letter codes the fallback already handles, listed for documentation.
     'bho': 'BHO',
     'ceb': 'CEB',
     'ckb': 'CKB',
@@ -67,10 +57,8 @@ function dlxLangCode(lang) {
     return lower.split('-')[0].toUpperCase();
 }
 
-// Extract the translated string from a DLX response. Two shapes exist in the
-// wild: { code: 200, data: "..." } and { translations: [{ text: "..." }] }.
-// Returns null when neither is present. Shared by translateWithDlx and the
-// connection test so an endpoint that translates also passes "Test Connection".
+// Extract the translated string from a DLX response. Two shapes:
+// { data: "..." } and { translations: [{ text: "..." }] }; null if neither.
 function parseDlxResponse(data) {
     if (data && typeof data.data === 'string') return data.data;
     if (Array.isArray(data?.translations) && data.translations[0]?.text != null) {
@@ -146,8 +134,7 @@ async function translateWithGoogle(text, sourceLanguage, destinationLanguage) {
 }
 
 // Batch-translate lyrics with the user's OpenAI-compatible endpoint. Returns
-// one translated string per input line, in order; throws with a reason
-// otherwise. Settings are read here instead of passed from the content script.
+// one translated string per input line; throws otherwise.
 async function translateWithAI({ lines, songTitle, artistName, destinationLanguage }) {
     const { aiEndpoint: endpoint, aiApiKey: apiKey, aiModel: model, aiThinkMode: thinkMode } =
         await chrome.storage.local.get(['aiEndpoint', 'aiApiKey', 'aiModel', 'aiThinkMode']);
@@ -235,10 +222,8 @@ async function translateWithAI({ lines, songTitle, artistName, destinationLangua
     return translations;
 }
 
-// Translation providers, keyed by the id the content script sends in the
-// TRANSLATE message. Each takes the message and resolves to exactly one
-// translated string per input line. Adding a provider means adding an entry
-// here (and its popup settings) — not a new message type.
+// Translation providers, keyed by the id in the TRANSLATE message. Each
+// resolves to one translated string per input line.
 const TRANSLATE_PROVIDERS = {
     google: (msg) => Promise.all(msg.lines.map(line => translateWithGoogle(line, msg.sourceLanguage, msg.destinationLanguage))),
     dlx: async (msg) => {
@@ -246,13 +231,11 @@ const TRANSLATE_PROVIDERS = {
         if (msg.lines.length === 1) {
             return [await translateWithDlx(msg.lines[0], msg.sourceLanguage, msg.destinationLanguage)];
         }
-        // DLX preserves newlines: the whole sheet goes out as one request and
-        // comes back as one string to split up again.
+        // DLX preserves newlines: send the whole sheet as one request, split the result.
         const result = await translateWithDlx(msg.lines.join('\n'), msg.sourceLanguage, msg.destinationLanguage);
         const translations = (result || '').split('\n');
         if (translations.length !== msg.lines.length) {
-            // The endpoint merged or dropped lines; the caller falls back to
-            // per-line requests rather than misaligning lyrics.
+            // The endpoint merged or dropped lines; throw rather than misalign lyrics.
             throw new Error(`DLX batch line count mismatch (got ${translations.length} for ${msg.lines.length} lines)`);
         }
         return translations;
@@ -260,8 +243,7 @@ const TRANSLATE_PROVIDERS = {
     customAI: (msg) => translateWithAI(msg),
 };
 
-// Connection tests, same keying. Resolve on success, throw with a reason on
-// failure. Providers without an entry have nothing testable from here.
+// Connection tests, same keying. Resolve on success, throw on failure.
 const TEST_PROVIDERS = {
     dlx: async (msg) => {
         const endpoint = (msg.endpoint || '').trim();

@@ -28,8 +28,7 @@ const clearAllCache = document.getElementById('clearAllCache');
 const clearStorage = document.getElementById('clearStorage');
 
 $(document).ready(function() {
-    // Render the dropdown inside the .optionDiv so the (nested) select2 CSS
-    // overrides apply — by default select2 appends it to <body>, out of scope.
+    // Render the dropdown inside .optionDiv so the nested select2 CSS overrides apply.
     $('#languageSelector').select2({
         dropdownParent: $('#languageSelector').parent()
     });
@@ -44,8 +43,8 @@ $(document).ready(function(){
 
  });
 
-// Default the dropdown to the browser language (Chromium + Firefox) when nothing
-// is stored yet, falling back to English. Mirrors getBrowserLanguage() in main.js.
+// Default the dropdown to the browser language when nothing is stored.
+// Mirrors getBrowserLanguage() in main.js.
 function getBrowserLanguage() {
     const candidates = [];
     if (Array.isArray(navigator.languages)) candidates.push(...navigator.languages);
@@ -126,9 +125,8 @@ chrome.storage.local.get(['translationProvider', 'aiEndpoint', 'aiApiKey', 'aiMo
     updateProviderSettingsVisibility();
 });
 
-// Show the settings panel for the selected provider, hide the others.
-// Panels come from the registry (scripts/providers.js), so a new provider
-// only needs a panelId there plus its markup in popup.html.
+// Show the settings panel for the selected provider, hide the others
+// (panels come from the registry).
 function updateProviderSettingsVisibility() {
     const provider = translationProvider.value;
     for (const [id, spec] of Object.entries(TRANSLATION_PROVIDERS)) {
@@ -233,10 +231,8 @@ function endpointOrigin(endpoint) {
     }
 }
 
-// Request access to the endpoint's origin. It's declared as an optional
-// permission, so we ask for it at runtime from a user gesture instead of
-// requesting blanket access up front. request() resolves true without a
-// prompt if already granted.
+// Request access to the endpoint's origin (an optional permission asked for at
+// runtime). Resolves true without a prompt if already granted.
 async function ensureHostPermission(endpoint) {
     const pattern = endpointOrigin(endpoint);
     if (!pattern) return false;
@@ -321,8 +317,7 @@ clearAllCache.addEventListener('click', () => {
     confirmAction(clearAllCache, () => sendToSpotifyTabs({ clearCache: 'all' }));
 });
 
-// Debug: wipe all saved settings (chrome.storage), resetting the extension to
-// defaults, then reload the popup so the controls reflect the cleared state.
+// Debug: wipe all saved settings and reload the popup.
 clearStorage.addEventListener('click', () => {
     confirmAction(clearStorage, async () => {
         try { await chrome.storage.local.clear(); } catch {}
