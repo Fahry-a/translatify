@@ -41,13 +41,9 @@ let aiBatchPending = false;
 // the MutationObserver does not Google-translate lines that appear during the wait.
 let aiFailoverEnabled = true;
 
-// Cache keys are namespaced by provider so switching providers (google <-> dlx)
-// never serves the other provider's cached results. The provider is passed
-// explicitly through the whole call chain (no mutable module state), so a pass
-// keeps using the provider it started with even if the user switches mid-pass.
-// The AI flow deliberately uses 'google' here: its results overwrite the
-// entries the Google failover pre-pass wrote, and the MutationObserver reads
-// them back from the same namespace.
+// Provider-namespaced cache key (google, dlx, customAI) so each provider's
+// results stay separate. The provider is passed explicitly through the call
+// chain, so a pass keeps its namespace even if the user switches mid-pass.
 function lineCacheKey(provider, text, sourceLanguage, destinationLanguage) {
     return `${provider}|${text}|${sourceLanguage}|${destinationLanguage}`;
 }
@@ -321,7 +317,12 @@ function scheduleDlxBatch() {
     }, 200);
 }
 
-async function setupMutationObserver(provider, mode) {
+async function setupMutationObserver(provider, mode, readProviders) {
+    // Cache namespaces the observer reads, highest priority first. Defaults to
+    // the provider's own; the AI flow passes ['customAI', 'google'] so a
+    // re-rendered line shows the AI result, not the Google failover copy.
+    const readNamespaces = readProviders || [provider];
+
     // Use a single observer that watches the main view for any changes
     const observerKey = `mainView`;
 
@@ -351,10 +352,18 @@ async function setupMutationObserver(provider, mode) {
             const lyricsText = wrapper.firstChild?.textContent;
             if (!lyricsText) return;
 
-            const cacheKey = lineCacheKey(provider, lyricsText, sourceLanguage, destinationLanguage);
-            if (translationCache.has(cacheKey)) {
-                replaceLyric(translationCache.get(cacheKey), wrapper);
-            } else if (provider === 'dlx') {
+            // Render from cache, checking read namespaces in priority order so
+            // an AI result in 'customAI' wins over the 'google' failover copy.
+            for (const ns of readNamespaces) {
+                const key = lineCacheKey(ns, lyricsText, sourceLanguage, destinationLanguage);
+                if (translationCache.has(key)) {
+                    replaceLyric(translationCache.get(key), wrapper);
+                    focusActiveLyric();
+                    return;
+                }
+            }
+
+            if (provider === 'dlx') {
                 // Untranslatable lines (♪, pure punctuation) are marked as
                 // themselves; only real text needs a DLX request.
                 if (isUntranslatable(lyricsText)) {
@@ -545,7 +554,7 @@ async function translateBatchWithAIAndRender(sourceLanguage, destinationLanguage
         currentWrappers.forEach(wrapper => {
             if (wrapper.classList.contains("modifedLyricsWrapper")) return;
             const text = wrapper.firstChild?.textContent || '';
-            const cacheKey = lineCacheKey('google', text, sourceLanguage, destinationLanguage);
+            const cacheKey = lineCacheKey('customAI', text, sourceLanguage, destinationLanguage);
             const cached = translationCache.get(cacheKey);
             if (cached != null) {
                 replaceLyric(cached, wrapper);
@@ -560,8 +569,9 @@ async function translateBatchWithAIAndRender(sourceLanguage, destinationLanguage
 
     // Start the MutationObserver now so that lyrics appearing during the AI
     // call get Google-translated immediately.  Once the AI batch completes,
-    // all visible translations are replaced with the AI results.
-    setupMutationObserver('google');
+    // all visible translations are replaced with the AI results. It reads
+    // 'customAI' first, then 'google', so re-rendered lines prefer the AI text.
+    setupMutationObserver('google', undefined, ['customAI', 'google']);
 
     aiBatchPending = true;
 
@@ -604,11 +614,11 @@ async function translateBatchWithAIAndRender(sourceLanguage, destinationLanguage
     // late Google write can't clobber the AI translation in translationCache.
     await googlePass;
 
-    // Populate line-level cache from the AI batch so the MutationObserver picks
-    // up AI translations instead of falling back to Google.
+    // Cache the AI batch results under Custom AI's 'customAI' namespace; the
+    // fast path above and the render loop below read them back.
     for (let i = 0; i < lines.length; i++) {
         if (translations[i] != null && lines[i]) {
-            translationCache.set(lineCacheKey('google', lines[i], sourceLanguage, destinationLanguage), translations[i]);
+            translationCache.set(lineCacheKey('customAI', lines[i], sourceLanguage, destinationLanguage), translations[i]);
         }
     }
 
@@ -620,7 +630,7 @@ async function translateBatchWithAIAndRender(sourceLanguage, destinationLanguage
     const currentWrappers = Array.from(document.querySelectorAll(lyricLine));
     currentWrappers.forEach(wrapper => {
         const text = wrapper.firstChild?.textContent || '';
-        const cacheKey = lineCacheKey('google', text, sourceLanguage, destinationLanguage);
+        const cacheKey = lineCacheKey('customAI', text, sourceLanguage, destinationLanguage);
         const aiTranslation = translationCache.get(cacheKey);
         if (aiTranslation == null) return;
 
@@ -635,7 +645,7 @@ async function translateBatchWithAIAndRender(sourceLanguage, destinationLanguage
     });
 
     focusActiveLyric();
-    setupMutationObserver('google');
+    setupMutationObserver('google', undefined, ['customAI', 'google']);
 }
 
 // MAIN TRANSLATION FUNCTION
