@@ -43,7 +43,8 @@
     "https://translate.googleapis.com/*"
   ],
   "optional_host_permissions": [
-    "https://*/*"
+    "https://*/*",
+    "http://*/*"
   ],
   "browser_specific_settings": {
     "gecko": {
