@@ -272,13 +272,14 @@ function restoreLyrics() {
 // recreates the observer with the then-current provider — in-flight callbacks
 // can never mix endpoints or cache namespaces.
 
-// Batch-translate queued DLX cache-miss lines after a short debounce so the
-// observer never fires per-line requests (which would give inconsistent results).
+// Batch-translate queued DLX cache-miss lines (batch mode) after a short
+// debounce, so the observer sends one request instead of one per line. A batch
+// failure surfaces the error marker and stops — no per-line fan-out, no retry.
 function scheduleDlxBatch() {
     if (dlxDebounceTimer) clearTimeout(dlxDebounceTimer);
     dlxDebounceTimer = setTimeout(async () => {
         const pending = dlxPendingMisses.splice(0);
-        console.log('Translatify: DLX fallback batch executing for', pending.length, 'lines');
+        console.log('Translatify: DLX observer batch executing for', pending.length, 'lines');
         if (pending.length === 0 || !isExtensionAlive()) return;
 
         const sourceLanguage = pending[0].sourceLanguage;
@@ -295,10 +296,16 @@ function scheduleDlxBatch() {
                 destinationLanguage
             });
         } catch {
-            return;
+            return; // extension context gone
         }
 
-        if (!response || response.error || !Array.isArray(response.translations)) return;
+        // Batch mode never fans out to per-line (it would hammer the endpoint):
+        // surface the error marker and leave the queued lines untranslated.
+        if (!response || response.error || !Array.isArray(response.translations)) {
+            if (response?.error) console.error('Translatify: DLX observer batch failed:', response.error);
+            setTranslateError(true);
+            return;
+        }
 
         uniqueLines.forEach((text, i) => {
             if (response.translations[i] != null) {
@@ -314,7 +321,7 @@ function scheduleDlxBatch() {
     }, 200);
 }
 
-async function setupMutationObserver(provider) {
+async function setupMutationObserver(provider, mode) {
     // Use a single observer that watches the main view for any changes
     const observerKey = `mainView`;
 
@@ -348,8 +355,18 @@ async function setupMutationObserver(provider) {
             if (translationCache.has(cacheKey)) {
                 replaceLyric(translationCache.get(cacheKey), wrapper);
             } else if (provider === 'dlx') {
-                dlxPendingMisses.push({ wrapper, lyricsText, sourceLanguage, destinationLanguage });
-                scheduleDlxBatch();
+                // Untranslatable lines (♪, pure punctuation) are marked as
+                // themselves; only real text needs a DLX request.
+                if (isUntranslatable(lyricsText)) {
+                    replaceLyric(lyricsText, wrapper);
+                } else if (mode === 'batch') {
+                    // Queue for one debounced batch request per burst of new lines.
+                    dlxPendingMisses.push({ wrapper, lyricsText, sourceLanguage, destinationLanguage });
+                    scheduleDlxBatch();
+                } else {
+                    // Per-line mode: honor the user's choice for late lines too.
+                    translateAndUpdateAsync('dlx', wrapper, lyricsText, sourceLanguage, destinationLanguage);
+                }
             } else if (!(aiBatchPending && !aiFailoverEnabled)) {
                 translateAndUpdateAsync(provider, wrapper, lyricsText, sourceLanguage, destinationLanguage);
             }
@@ -435,7 +452,9 @@ async function translatePerLine(provider, sourceLanguage, destinationLanguage) {
     await Promise.all(promises);
 
     focusActiveLyric();
-    setupMutationObserver(provider);
+    // translatePerLine is the per-line flow for every provider, so the observer
+    // stays per-line for late lines too (matching the user's per-line choice).
+    setupMutationObserver(provider, 'perline');
 }
 
 // Translate the whole lyric sheet in one DLX request (DLX preserves newlines),
@@ -474,8 +493,8 @@ async function translateBatchWithDlx(sourceLanguage, destinationLanguage) {
         }
 
         if (!response || response.error || !Array.isArray(response.translations)) {
-            if (response?.error) console.error('Translatify: DLX batch failed, falling back to per-line:', response.error);
-            return translatePerLine('dlx', sourceLanguage, destinationLanguage);
+            if (response?.error) console.error('Translatify: DLX batch failed:', response.error);
+            return false;   // signal failure to runTranslate; no per-line fan-out, no retry
         }
 
         uncached.forEach((text, i) => {
@@ -501,7 +520,7 @@ async function translateBatchWithDlx(sourceLanguage, destinationLanguage) {
     });
 
     focusActiveLyric();
-    setupMutationObserver('dlx');
+    setupMutationObserver('dlx', 'batch');
 }
 
 // Batch translate all lyrics with AI, then render them
@@ -669,26 +688,26 @@ async function runTranslate() {
         const mode = resolveTranslationMode(resolved, settings);
         // Show the loading indicator only while lyrics are actually being fetched/rendered.
         setTranslatingIndicator(true);
-        let aiErrored = false;
+        let providerErrored = false;
         try {
             if (resolved.id === 'customAI') {
-                aiErrored = (await translateBatchWithAIAndRender(sourceLanguage, destinationLanguage)) === false;
+                providerErrored = (await translateBatchWithAIAndRender(sourceLanguage, destinationLanguage)) === false;
             } else if (resolved.id === 'dlx' && mode === 'batch') {
-                await translateBatchWithDlx(sourceLanguage, destinationLanguage);
+                providerErrored = (await translateBatchWithDlx(sourceLanguage, destinationLanguage)) === false;
             } else {
                 await translatePerLine(resolved.id, sourceLanguage, destinationLanguage);
             }
         } finally {
             setTranslatingIndicator(false);
         }
-        // Swap the loading dots for an error marker when the AI endpoint
-        // failed, or when the configured provider is misconfigured and this
-        // pass quietly used Google instead — so the user can tell something
-        // is off rather than assuming their provider did the work.
+        // Swap the loading dots for an error marker when the provider's batch
+        // failed (AI or DLX), or when the configured provider is misconfigured
+        // and this pass quietly used Google instead — so the user can tell
+        // something is off rather than assuming their provider did the work.
         if (resolved.fallback) {
             console.warn(`Translatify: provider "${settings.translationProvider}" is missing required settings, used ${resolved.id} instead`);
         }
-        if (aiErrored || resolved.fallback) setTranslateError(true);
+        if (providerErrored || resolved.fallback) setTranslateError(true);
     } else if (translateButton.getAttribute("aria-pressed") == "false") {
         setTranslateError(false);
         restoreLyrics();
